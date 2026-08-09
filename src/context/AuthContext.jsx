@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { fetchJson } from '../lib/api';
 
 const AuthContext = createContext();
 
@@ -14,20 +15,15 @@ export const AuthProvider = ({ children }) => {
       const storedToken = localStorage.getItem('catalog_jwt');
       if (storedToken) {
         try {
-          const response = await fetch('/api/auth/me', {
+          const data = await fetchJson('/api/auth/me', {
             headers: {
               Authorization: `Bearer ${storedToken}`,
             },
           });
-          if (response.ok) {
-            const data = await response.json();
-            setUser(data.user);
-            setToken(storedToken);
-          } else {
-            // Token expired or invalid
-            logout();
-          }
+          setUser(data.user);
+          setToken(storedToken);
         } catch (err) {
+          if (err.status === 401 || err.status === 403) logout();
           console.error('Error al verificar sesión:', err);
         }
       }

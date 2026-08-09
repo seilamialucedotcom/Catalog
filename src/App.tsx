@@ -8,6 +8,7 @@ import ProductModal from './components/ProductModal';
 import CartDrawer from './components/CartDrawer';
 import LoginModal from './components/LoginModal';
 import AdminDashboard from './components/AdminDashboard';
+import { fetchJson } from './lib/api';
 
 import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -20,6 +21,7 @@ function MainCatalogApp() {
   const [categories, setCategories] = useState([]);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [catalogError, setCatalogError] = useState('');
 
   // Filter States
   const [searchTerm, setSearchTerm] = useState('');
@@ -44,14 +46,13 @@ function MainCatalogApp() {
   // Fetch initial catalog state
   const loadCatalogData = async () => {
     try {
-      const res = await fetch('/api/catalog/init');
-      if (res.ok) {
-        const data = await res.json();
-        setSettings(data.settings);
-        setCategories(data.categories || []);
-      }
+      const data = await fetchJson('/api/catalog/init');
+      setSettings(data.settings);
+      setCategories(data.categories || []);
+      setCatalogError('');
     } catch (err) {
       console.error('Error al cargar datos del catálogo:', err);
+      setCatalogError(err instanceof Error ? err.message : 'No se pudo cargar el catálogo.');
     } finally {
       setLoading(false);
     }
@@ -66,11 +67,8 @@ function MainCatalogApp() {
       if (activeSubcategory !== null) params.append('subcategory_id', String(activeSubcategory));
       if (onlyFeatured) params.append('is_featured', 'true');
 
-      const res = await fetch(`/api/products?${params.toString()}`);
-      if (res.ok) {
-        const data = await res.json();
-        setProducts(data);
-      }
+      const data = await fetchJson(`/api/products?${params.toString()}`);
+      setProducts(data);
     } catch (err) {
       console.error('Error al cargar productos:', err);
     }
@@ -127,6 +125,25 @@ function MainCatalogApp() {
         <p className="text-sm font-semibold tracking-wider text-[#d99000] animate-pulse">
           Cargando Catálogo...
         </p>
+      </div>
+    );
+  }
+
+  if (catalogError && !settings) {
+    return (
+      <div className="min-h-screen bg-[#ede6db] flex flex-col items-center justify-center text-slate-800 p-6 text-center">
+        <h1 className="text-xl font-bold mb-2">No se pudo cargar el catálogo</h1>
+        <p className="max-w-lg text-sm text-slate-600">{catalogError}</p>
+        <button
+          type="button"
+          onClick={() => {
+            setLoading(true);
+            loadCatalogData();
+          }}
+          className="mt-5 rounded-xl bg-[#d99000] px-4 py-2 text-sm font-bold text-slate-950"
+        >
+          Reintentar
+        </button>
       </div>
     );
   }

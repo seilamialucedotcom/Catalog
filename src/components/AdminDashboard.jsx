@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
+import { readJsonResponse } from '../lib/api';
 
 export default function AdminDashboard({
   isOpen,
@@ -251,7 +252,7 @@ export default function AdminDashboard({
 
       if (!res.ok) throw new Error('Error al guardar configuraciones');
 
-      const updated = await res.json();
+      const updated = await readJsonResponse(res);
       updateSettingsState(updated);
       setSaveStatus('¡Ajustes guardados correctamente!');
       setTimeout(() => setSaveStatus(''), 3000);

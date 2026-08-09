@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, Lock, Mail, AlertCircle, ArrowRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { fetchJson } from '../lib/api';
 
 export default function LoginModal() {
   const { isLoginModalOpen, closeLoginModal, login } = useAuth();
@@ -22,17 +23,11 @@ export default function LoginModal() {
       const endpoint = isRegister ? '/api/auth/register' : '/api/auth/login';
       const payload = isRegister ? { name, email, password } : { email, password };
 
-      const res = await fetch(endpoint, {
+      const data = await fetchJson(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error || 'Error de autenticación');
-      }
 
       login(data.user, data.token);
     } catch (err) {
@@ -168,4 +163,3 @@ export default function LoginModal() {
     </div>
   );
 }
-

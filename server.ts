@@ -3,6 +3,7 @@ import path from 'path';
 import fs from 'fs';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
+import { Pool } from 'pg';
 import { createServer as createViteServer } from 'vite';
 import {
   memoryDb,
@@ -13,7 +14,7 @@ import {
   defaultSettings,
 } from './src/db/database.js';
 
-const app = express();
+export const app = express();
 const PORT = 3000;
 const JWT_SECRET = process.env.JWT_SECRET || 'catalogo-inteligente-jwt-secret-key-2026';
 
@@ -609,7 +610,7 @@ app.post('/api/admin/db-test', authenticateJWT, requireAdmin, async (req: Authen
   }
 
   try {
-    const tempPool = new (require('pg').Pool)({
+    const tempPool = new Pool({
       connectionString: connStr,
       ssl: { rejectUnauthorized: false },
     });
@@ -631,8 +632,23 @@ app.post('/api/admin/db-test', authenticateJWT, requireAdmin, async (req: Authen
   }
 });
 
+// Return JSON for malformed request bodies and unknown API routes. This prevents
+// Express' HTML error pages from reaching clients that expect JSON.
+app.use((err: any, req: Request, res: Response, next: NextFunction) => {
+  if (err instanceof SyntaxError && 'body' in err) {
+    return res.status(400).json({ error: 'El cuerpo de la solicitud no contiene JSON válido' });
+  }
+
+  console.error('Error no controlado en la API:', err);
+  return res.status(500).json({ error: 'Error interno del servidor' });
+});
+
+app.use('/api', (req: Request, res: Response) => {
+  res.status(404).json({ error: `Ruta de API no encontrada: ${req.method} ${req.originalUrl}` });
+});
+
 // ==========================================
-// VITE MIDDLEWARE & SERVER INITIALIZATION
+// LOCAL VITE SERVER INITIALIZATION
 // ==========================================
 
 async function startServer() {
@@ -655,4 +671,13 @@ async function startServer() {
   });
 }
 
-startServer();
+// Vercel imports the Express instance from api/[...path].ts. A serverless
+// function must not call listen(), because Vercel owns the HTTP server.
+if (!process.env.VERCEL) {
+  startServer().catch((error) => {
+    console.error('No se pudo iniciar el servidor local:', error);
+    process.exitCode = 1;
+  });
+}
+
+export default app;
