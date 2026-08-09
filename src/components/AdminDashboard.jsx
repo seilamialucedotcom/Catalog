@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
-import { readJsonResponse } from '../lib/api';
+import { mockStore } from '../data/mockStore';
 
 export default function AdminDashboard({
   isOpen,
@@ -21,7 +21,7 @@ export default function AdminDashboard({
   categories = [],
   onRefreshData,
 }) {
-  const { token, logout } = useAuth();
+  const { logout } = useAuth();
   const { settings, updateSettingsState } = useTheme();
 
   const [activeTab, setActiveTab] = useState('products'); // 'products', 'categories', 'settings'
@@ -117,21 +117,7 @@ export default function AdminDashboard({
   const handleSaveProduct = async (e) => {
     e.preventDefault();
     try {
-      const method = editingProduct ? 'PUT' : 'POST';
-      const endpoint = editingProduct
-        ? `/api/admin/products/${editingProduct.id}`
-        : '/api/admin/products';
-
-      const res = await fetch(endpoint, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(productForm),
-      });
-
-      if (!res.ok) throw new Error('Error al guardar el producto');
+      mockStore.saveProduct(productForm, editingProduct?.id);
 
       setIsProductModalOpen(false);
       onRefreshData();
@@ -143,11 +129,7 @@ export default function AdminDashboard({
   const handleDeleteProduct = async (id) => {
     if (!confirm('¿Estás seguro de que deseas eliminar este producto?')) return;
     try {
-      const res = await fetch(`/api/admin/products/${id}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (!res.ok) throw new Error('Error al eliminar producto');
+      mockStore.deleteProduct(id);
       onRefreshData();
     } catch (err) {
       alert(err.message);
@@ -158,21 +140,7 @@ export default function AdminDashboard({
   const handleSaveCategory = async (e) => {
     e.preventDefault();
     try {
-      const method = editingCategory ? 'PUT' : 'POST';
-      const endpoint = editingCategory
-        ? `/api/admin/categories/${editingCategory.id}`
-        : '/api/admin/categories';
-
-      const res = await fetch(endpoint, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(categoryForm),
-      });
-
-      if (!res.ok) throw new Error('Error al guardar la categoría');
+      mockStore.saveCategory(categoryForm, editingCategory?.id);
 
       setIsCategoryModalOpen(false);
       onRefreshData();
@@ -184,11 +152,7 @@ export default function AdminDashboard({
   const handleDeleteCategory = async (id) => {
     if (!confirm('¿Deseas eliminar esta categoría y todas sus subcategorías?')) return;
     try {
-      const res = await fetch(`/api/admin/categories/${id}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (!res.ok) throw new Error('Error al eliminar categoría');
+      mockStore.deleteCategory(id);
       onRefreshData();
     } catch (err) {
       alert(err.message);
@@ -200,19 +164,10 @@ export default function AdminDashboard({
     if (!selectedCatForSub || !newSubcategoryName) return;
 
     try {
-      const res = await fetch('/api/admin/subcategories', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          category_id: selectedCatForSub,
-          name: newSubcategoryName,
-        }),
+      mockStore.addSubcategory({
+        category_id: selectedCatForSub,
+        name: newSubcategoryName,
       });
-
-      if (!res.ok) throw new Error('Error al crear subcategoría');
 
       setNewSubcategoryName('');
       onRefreshData();
@@ -224,11 +179,7 @@ export default function AdminDashboard({
   const handleDeleteSubcategory = async (subId) => {
     if (!confirm('¿Eliminar esta subcategoría?')) return;
     try {
-      const res = await fetch(`/api/admin/subcategories/${subId}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (!res.ok) throw new Error('Error al eliminar subcategoría');
+      mockStore.deleteSubcategory(subId);
       onRefreshData();
     } catch (err) {
       alert(err.message);
@@ -241,18 +192,7 @@ export default function AdminDashboard({
     setSaveStatus('Guardando cambios...');
 
     try {
-      const res = await fetch('/api/admin/settings', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(settingsForm),
-      });
-
-      if (!res.ok) throw new Error('Error al guardar configuraciones');
-
-      const updated = await readJsonResponse(res);
+      const updated = mockStore.saveSettings(settingsForm);
       updateSettingsState(updated);
       setSaveStatus('¡Ajustes guardados correctamente!');
       setTimeout(() => setSaveStatus(''), 3000);

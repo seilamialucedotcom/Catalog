@@ -1,6 +1,6 @@
 {
   "name": "Catálogo Digital Inteligente",
-  "description": "Plataforma de catálogo digital inteligente con panel de administración, temas adaptativos dinámicos, filtros en tiempo real, integración con WhatsApp y soporte para Neon PostgreSQL.",
+  "description": "Catálogo digital de frontend con panel de administración, temas adaptativos, filtros en tiempo real e información simulada en localStorage.",
   "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+  "majorCapabilities": []
 }

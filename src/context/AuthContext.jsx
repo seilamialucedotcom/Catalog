@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { fetchJson } from '../lib/api';
+import { mockStore } from '../data/mockStore';
 
 const AuthContext = createContext();
 
@@ -11,20 +11,20 @@ export const AuthProvider = ({ children }) => {
 
   // Check current token on initial mount
   useEffect(() => {
-    const verifyToken = async () => {
+    const verifyToken = () => {
       const storedToken = localStorage.getItem('catalog_jwt');
       if (storedToken) {
         try {
-          const data = await fetchJson('/api/auth/me', {
-            headers: {
-              Authorization: `Bearer ${storedToken}`,
-            },
-          });
-          setUser(data.user);
-          setToken(storedToken);
+          const storedUser = mockStore.getSession(storedToken);
+          if (!storedUser) {
+            logout();
+          } else {
+            setUser(storedUser);
+            setToken(storedToken);
+          }
         } catch (err) {
-          if (err.status === 401 || err.status === 403) logout();
-          console.error('Error al verificar sesión:', err);
+          console.error('Error al restaurar la sesión local:', err);
+          logout();
         }
       }
       setLoading(false);

@@ -8,7 +8,7 @@ import ProductModal from './components/ProductModal';
 import CartDrawer from './components/CartDrawer';
 import LoginModal from './components/LoginModal';
 import AdminDashboard from './components/AdminDashboard';
-import { fetchJson } from './lib/api';
+import { mockStore } from './data/mockStore';
 
 import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -46,10 +46,9 @@ function MainCatalogApp() {
   // Fetch initial catalog state
   const loadCatalogData = async () => {
     try {
-      const data = await fetchJson('/api/catalog/init');
+      const data = mockStore.getCatalog();
       setSettings(data.settings);
-      setCategories(data.categories || []);
-      setCatalogError('');
+      setCategories(data.categories);
     } catch (err) {
       console.error('Error al cargar datos del catálogo:', err);
       setCatalogError(err instanceof Error ? err.message : 'No se pudo cargar el catálogo.');
@@ -61,13 +60,12 @@ function MainCatalogApp() {
   // Fetch products based on active filters
   const loadProducts = async () => {
     try {
-      const params = new URLSearchParams();
-      if (searchTerm) params.append('search', searchTerm);
-      if (activeCategory !== null) params.append('category_id', String(activeCategory));
-      if (activeSubcategory !== null) params.append('subcategory_id', String(activeSubcategory));
-      if (onlyFeatured) params.append('is_featured', 'true');
-
-      const data = await fetchJson(`/api/products?${params.toString()}`);
+      const data = mockStore.getProducts({
+        search: searchTerm,
+        category_id: activeCategory,
+        subcategory_id: activeSubcategory,
+        is_featured: onlyFeatured,
+      });
       setProducts(data);
     } catch (err) {
       console.error('Error al cargar productos:', err);

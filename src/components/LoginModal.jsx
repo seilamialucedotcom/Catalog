@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { X, Lock, Mail, AlertCircle, ArrowRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { fetchJson } from '../lib/api';
+import { mockStore } from '../data/mockStore';
 
 export default function LoginModal() {
   const { isLoginModalOpen, closeLoginModal, login } = useAuth();
@@ -20,14 +20,9 @@ export default function LoginModal() {
     setSubmitting(true);
 
     try {
-      const endpoint = isRegister ? '/api/auth/register' : '/api/auth/login';
-      const payload = isRegister ? { name, email, password } : { email, password };
-
-      const data = await fetchJson(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
+      const data = isRegister
+        ? mockStore.register({ name, email, password })
+        : mockStore.login(email, password);
 
       login(data.user, data.token);
     } catch (err) {

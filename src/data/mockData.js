@@ -1,0 +1,46 @@
+export const mockData = {
+  settings: {
+    id: 1,
+    store_name: 'Comercial Alexis & hnos.',
+    logo_url: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=200&auto=format&fit=crop&q=80',
+    primary_color: '#d99000',
+    secondary_color: '#181818',
+    whatsapp_number: '+51989900564',
+    secondary_whatsapp: '+51903009238',
+    contact_email: 'admin@catalogo.com',
+  },
+  categories: [
+    { id: 1, name: 'Tecnología & Gadgets', slug: 'tecnologia-gadgets', image_url: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=300&auto=format&fit=crop&q=80', order_index: 1 },
+    { id: 2, name: 'Moda Cyberpunk', slug: 'moda-cyberpunk', image_url: 'https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=300&auto=format&fit=crop&q=80', order_index: 2 },
+    { id: 3, name: 'Hogar Inteligente', slug: 'hogar-inteligente', image_url: 'https://images.unsplash.com/photo-1558002038-1055907df827?w=300&auto=format&fit=crop&q=80', order_index: 3 },
+    { id: 4, name: 'Audio de Alta Fidelidad', slug: 'audio-hi-fi', image_url: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300&auto=format&fit=crop&q=80', order_index: 4 },
+    { id: 5, name: 'Accesorios & Relojes', slug: 'accesorios-relojes', image_url: 'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=300&auto=format&fit=crop&q=80', order_index: 5 },
+  ],
+  subcategories: [
+    { id: 1, category_id: 1, name: 'Smartphones & Tablets', slug: 'smartphones-tablets' },
+    { id: 2, category_id: 1, name: 'Laptops Pro', slug: 'laptops-pro' },
+    { id: 3, category_id: 1, name: 'Drones & VR', slug: 'drones-vr' },
+    { id: 4, category_id: 2, name: 'Chaquetas LED', slug: 'chaquetas-led' },
+    { id: 5, category_id: 2, name: 'Calzado Neón', slug: 'calzado-neon' },
+    { id: 6, category_id: 3, name: 'Iluminación RGB', slug: 'iluminacion-rgb' },
+    { id: 7, category_id: 3, name: 'Asistentes IA', slug: 'asistentes-ia' },
+    { id: 8, category_id: 4, name: 'Auriculares Inalámbricos', slug: 'auriculares' },
+    { id: 9, category_id: 4, name: 'Altavoces Studio', slug: 'altavoces' },
+    { id: 10, category_id: 5, name: 'Smartwatches', slug: 'smartwatches' },
+  ],
+  products: [
+    { id: 1, name: 'Auriculares Quantum Pro RGB', slug: 'auriculares-quantum-pro-rgb', description: 'Auriculares con cancelación activa de ruido por IA, sonido envolvente 3D espacial y retroiluminación LED sincronizable.', price: 189.99, category_id: 4, subcategory_id: 8, image_url: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&auto=format&fit=crop&q=80', is_featured: true, stock: 15 },
+    { id: 2, name: 'Smartwatch CyberMotion X1', slug: 'smartwatch-cybermotion-x1', description: 'Reloj inteligente con pantalla AMOLED de 120Hz, GPS y chasis de titanio ultraligero.', price: 249.5, category_id: 5, subcategory_id: 10, image_url: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&auto=format&fit=crop&q=80', is_featured: true, stock: 8 },
+    { id: 3, name: 'Laptop Neon Blade Ultra 16', slug: 'laptop-neon-blade-ultra-16', description: 'Laptop para IA y edición 8K con pantalla OLED táctil ultra brillante.', price: 1499, category_id: 1, subcategory_id: 2, image_url: 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=600&auto=format&fit=crop&q=80', is_featured: true, stock: 5 },
+    { id: 4, name: 'Chaqueta Reflectante Neo-Tokyo', slug: 'chaqueta-reflectante-neo-tokyo', description: 'Chaqueta impermeable con paneles de fibra óptica y tiras reflectantes.', price: 120, category_id: 2, subcategory_id: 4, image_url: 'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=600&auto=format&fit=crop&q=80', is_featured: false, stock: 20 },
+    { id: 5, name: 'Lámpara de Ambiente Inteligente RGB', slug: 'lampara-ambiente-inteligente-rgb', description: 'Lámpara con sincronización de música, control por voz y millones de colores.', price: 65, category_id: 3, subcategory_id: 6, image_url: 'https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=600&auto=format&fit=crop&q=80', is_featured: true, stock: 12 },
+    { id: 6, name: 'Dron Cinematográfico Aero 4K', slug: 'dron-cinematografico-aero-4k', description: 'Dron plegable con evitación de obstáculos y cámara 4K.', price: 899.99, category_id: 1, subcategory_id: 3, image_url: 'https://images.unsplash.com/photo-1527977966376-1c8408f9f108?w=600&auto=format&fit=crop&q=80', is_featured: false, stock: 7 },
+    { id: 7, name: 'Zapatillas Bionic Runner Glow', slug: 'zapatillas-bionic-runner-glow', description: 'Zapatillas deportivas con suela autorregulable y luces LED.', price: 135.5, category_id: 2, subcategory_id: 5, image_url: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&auto=format&fit=crop&q=80', is_featured: true, stock: 18 },
+    { id: 8, name: 'Altavoz de Estudio Hi-Fi Pulse', slug: 'altavoz-estudio-hifi-pulse', description: 'Altavoz de 120W con Wi-Fi, Bluetooth 5.3 y chasis acústico.', price: 310, category_id: 4, subcategory_id: 9, image_url: 'https://images.unsplash.com/photo-1545454675-3531b543be5d?w=600&auto=format&fit=crop&q=80', is_featured: false, stock: 9 },
+  ],
+  // Credenciales de demostración exclusivamente locales.
+  users: [
+    { id: 1, name: 'Administrador Principal', email: 'admin@catalogo.com', password: 'admin123', role: 'admin' },
+    { id: 2, name: 'Usuario Cliente', email: 'cliente@catalogo.com', password: 'user123', role: 'user' },
+  ],
+};
