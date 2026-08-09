@@ -64,6 +64,33 @@ export default function AdminDashboard({
 
   const [saveStatus, setSaveStatus] = useState('');
 
+  const handleLogoUpload = (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      setSaveStatus('Selecciona un archivo de imagen válido.');
+      event.target.value = '';
+      return;
+    }
+
+    // La imagen se guarda como data URL en localStorage, por lo que se limita
+    // su tamaño para evitar exceder la cuota disponible del navegador.
+    if (file.size > 1024 * 1024) {
+      setSaveStatus('El logo debe pesar como máximo 1 MB.');
+      event.target.value = '';
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      setSettingsForm((current) => ({ ...current, logo_url: String(reader.result) }));
+      setSaveStatus('Logo cargado. Guarda los ajustes para aplicarlo.');
+    };
+    reader.onerror = () => setSaveStatus('No se pudo leer el archivo seleccionado.');
+    reader.readAsDataURL(file);
+  };
+
   useEffect(() => {
     if (isOpen) {
       setSettingsForm({
@@ -520,12 +547,13 @@ export default function AdminDashboard({
               </div>
 
               <div>
-                <label className="text-xs font-semibold text-slate-200 block mb-1">URL del Logo (Imagen PNG/SVG/JPG)</label>
+                <label className="text-xs font-semibold text-slate-200 block mb-1">Logo de la empresa</label>
                 <div className="flex gap-2">
                   <input
                     type="url"
                     value={settingsForm.logo_url}
                     onChange={(e) => setSettingsForm({ ...settingsForm, logo_url: e.target.value })}
+                    placeholder="Pega la URL de la imagen"
                     className="flex-1 bg-[#242424] border border-[#333333] text-slate-100 text-xs rounded-xl p-2.5 focus:border-[#d99000] focus:outline-none"
                   />
                   {settingsForm.logo_url && (
@@ -534,6 +562,27 @@ export default function AdminDashboard({
                       alt="Logo preview"
                       className="w-10 h-10 rounded-xl object-cover border border-[#d99000]/40 bg-[#181818]"
                     />
+                  )}
+                </div>
+                <div className="mt-3 flex flex-wrap items-center gap-3">
+                  <label className="inline-flex items-center rounded-xl border border-[#d99000]/40 bg-[#242424] px-3 py-2 text-xs font-semibold text-[#d99000] transition-colors hover:bg-[#303030] cursor-pointer">
+                    Subir imagen desde el equipo
+                    <input
+                      type="file"
+                      accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml"
+                      onChange={handleLogoUpload}
+                      className="sr-only"
+                    />
+                  </label>
+                  <span className="text-[11px] text-slate-400">PNG, JPG, WebP, GIF o SVG; máximo 1 MB.</span>
+                  {settingsForm.logo_url && (
+                    <button
+                      type="button"
+                      onClick={() => setSettingsForm({ ...settingsForm, logo_url: '' })}
+                      className="text-xs text-slate-400 underline hover:text-rose-300 cursor-pointer"
+                    >
+                      Quitar logo
+                    </button>
                   )}
                 </div>
               </div>
