@@ -73,6 +73,39 @@ export default function AdminDashboard({
   });
 
   const [saveStatus, setSaveStatus] = useState('');
+  const [productImageStatus, setProductImageStatus] = useState('');
+  const [categoryImageStatus, setCategoryImageStatus] = useState('');
+
+  const handleImageUpload = (event, setImageUrl, setStatus) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      setStatus('Selecciona un archivo de imagen válido.');
+      event.target.value = '';
+      return;
+    }
+
+    // Se conserva la imagen en el mismo campo que las URL, como data URL.
+    // El límite evita generar peticiones y registros demasiado grandes.
+    if (file.size > 1024 * 1024) {
+      setStatus('La imagen debe pesar como máximo 1 MB.');
+      event.target.value = '';
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      setImageUrl(String(reader.result));
+      setStatus('Imagen cargada desde el equipo. Guarda para aplicarla.');
+      event.target.value = '';
+    };
+    reader.onerror = () => {
+      setStatus('No se pudo leer el archivo seleccionado.');
+      event.target.value = '';
+    };
+    reader.readAsDataURL(file);
+  };
 
   const handleLogoUpload = (event) => {
     const file = event.target.files?.[0];
@@ -125,6 +158,7 @@ export default function AdminDashboard({
   // PRODUCT ACTIONS
   const handleOpenCreateProduct = () => {
     setEditingProduct(null);
+    setProductImageStatus('');
     setProductForm({
       name: '',
       description: '',
@@ -139,6 +173,7 @@ export default function AdminDashboard({
 
   const handleOpenEditProduct = (prod) => {
     setEditingProduct(prod);
+    setProductImageStatus('');
     setProductForm({
       name: prod.name || '',
       description: prod.description || '',
@@ -423,6 +458,7 @@ export default function AdminDashboard({
                 <button
                   onClick={() => {
                     setEditingCategory(null);
+                    setCategoryImageStatus('');
                     setCategoryForm({ name: '', image_url: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=300&auto=format&fit=crop&q=80' });
                     setIsCategoryModalOpen(true);
                   }}
@@ -454,6 +490,7 @@ export default function AdminDashboard({
                       <button
                         onClick={() => {
                           setEditingCategory(cat);
+                          setCategoryImageStatus('');
                           setCategoryForm({ name: cat.name, image_url: cat.image_url });
                           setIsCategoryModalOpen(true);
                         }}
@@ -755,14 +792,46 @@ export default function AdminDashboard({
               </div>
 
               <div>
-                <label className="text-xs text-slate-300 block mb-1">URL de la Imagen</label>
-                <input
-                  type="url"
-                  required
-                  value={productForm.image_url}
-                  onChange={(e) => setProductForm({ ...productForm, image_url: e.target.value })}
-                  className="w-full bg-[#242424] border border-[#333333] text-slate-100 text-xs rounded-xl p-2.5 focus:border-[#d99000] focus:outline-none"
-                />
+                <label className="text-xs text-slate-300 block mb-1">Imagen del producto</label>
+                <div className="flex gap-2">
+                  <input
+                    type="url"
+                    required
+                    value={productForm.image_url}
+                    onChange={(e) => {
+                      setProductForm({ ...productForm, image_url: e.target.value });
+                      setProductImageStatus('');
+                    }}
+                    placeholder="Pega la URL de la imagen"
+                    className="flex-1 bg-[#242424] border border-[#333333] text-slate-100 text-xs rounded-xl p-2.5 focus:border-[#d99000] focus:outline-none"
+                  />
+                  {productForm.image_url && (
+                    <img
+                      src={productForm.image_url}
+                      alt="Vista previa del producto"
+                      className="w-10 h-10 rounded-xl object-cover border border-[#d99000]/40 bg-[#181818]"
+                    />
+                  )}
+                </div>
+                <div className="mt-3 flex flex-wrap items-center gap-3">
+                  <label className="inline-flex items-center rounded-xl border border-[#d99000]/40 bg-[#242424] px-3 py-2 text-xs font-semibold text-[#d99000] transition-colors hover:bg-[#303030] cursor-pointer">
+                    Subir imagen desde el equipo
+                    <input
+                      type="file"
+                      accept="image/png,image/jpeg,image/webp,image/gif"
+                      onChange={(event) => handleImageUpload(
+                        event,
+                        (image_url) => setProductForm((current) => ({ ...current, image_url })),
+                        setProductImageStatus,
+                      )}
+                      className="sr-only"
+                    />
+                  </label>
+                  <span className="text-[11px] text-slate-400">O pega una URL. PNG, JPG, WebP o GIF; máximo 1 MB.</span>
+                </div>
+                {productImageStatus && (
+                  <p className="mt-2 text-[11px] text-[#d99000]">{productImageStatus}</p>
+                )}
               </div>
 
               <div className="flex items-center gap-2 pt-2">
@@ -819,14 +888,46 @@ export default function AdminDashboard({
               </div>
 
               <div>
-                <label className="text-xs text-slate-300 block mb-1">URL de la Imagen Circular</label>
-                <input
-                  type="url"
-                  required
-                  value={categoryForm.image_url}
-                  onChange={(e) => setCategoryForm({ ...categoryForm, image_url: e.target.value })}
-                  className="w-full bg-[#242424] border border-[#333333] text-slate-100 text-xs rounded-xl p-2.5 focus:border-[#d99000] focus:outline-none"
-                />
+                <label className="text-xs text-slate-300 block mb-1">Imagen circular de la categoría</label>
+                <div className="flex gap-2">
+                  <input
+                    type="url"
+                    required
+                    value={categoryForm.image_url}
+                    onChange={(e) => {
+                      setCategoryForm({ ...categoryForm, image_url: e.target.value });
+                      setCategoryImageStatus('');
+                    }}
+                    placeholder="Pega la URL de la imagen"
+                    className="flex-1 bg-[#242424] border border-[#333333] text-slate-100 text-xs rounded-xl p-2.5 focus:border-[#d99000] focus:outline-none"
+                  />
+                  {categoryForm.image_url && (
+                    <img
+                      src={categoryForm.image_url}
+                      alt="Vista previa de la categoría"
+                      className="w-10 h-10 rounded-full object-cover border border-[#d99000]/40 bg-[#181818]"
+                    />
+                  )}
+                </div>
+                <div className="mt-3 flex flex-wrap items-center gap-3">
+                  <label className="inline-flex items-center rounded-xl border border-[#d99000]/40 bg-[#242424] px-3 py-2 text-xs font-semibold text-[#d99000] transition-colors hover:bg-[#303030] cursor-pointer">
+                    Subir imagen desde el equipo
+                    <input
+                      type="file"
+                      accept="image/png,image/jpeg,image/webp,image/gif"
+                      onChange={(event) => handleImageUpload(
+                        event,
+                        (image_url) => setCategoryForm((current) => ({ ...current, image_url })),
+                        setCategoryImageStatus,
+                      )}
+                      className="sr-only"
+                    />
+                  </label>
+                  <span className="text-[11px] text-slate-400">O pega una URL. PNG, JPG, WebP o GIF; máximo 1 MB.</span>
+                </div>
+                {categoryImageStatus && (
+                  <p className="mt-2 text-[11px] text-[#d99000]">{categoryImageStatus}</p>
+                )}
               </div>
 
               <button
