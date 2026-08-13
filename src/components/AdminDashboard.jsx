@@ -12,7 +12,17 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
-import { mockStore } from '../data/mockStore';
+import {
+  createCategory,
+  createProduct,
+  createSubcategory,
+  deleteCategory,
+  deleteProduct,
+  deleteSubcategory,
+  updateCategory,
+  updateProduct,
+  updateStoreSettings,
+} from '../services/admin';
 
 export default function AdminDashboard({
   isOpen,
@@ -144,10 +154,14 @@ export default function AdminDashboard({
   const handleSaveProduct = async (e) => {
     e.preventDefault();
     try {
-      mockStore.saveProduct(productForm, editingProduct?.id);
+      if (editingProduct?.id) {
+        await updateProduct(editingProduct.id, productForm);
+      } else {
+        await createProduct(productForm);
+      }
 
       setIsProductModalOpen(false);
-      onRefreshData();
+      await onRefreshData();
     } catch (err) {
       alert(err.message);
     }
@@ -156,8 +170,8 @@ export default function AdminDashboard({
   const handleDeleteProduct = async (id) => {
     if (!confirm('¿Estás seguro de que deseas eliminar este producto?')) return;
     try {
-      mockStore.deleteProduct(id);
-      onRefreshData();
+      await deleteProduct(id);
+      await onRefreshData();
     } catch (err) {
       alert(err.message);
     }
@@ -167,10 +181,14 @@ export default function AdminDashboard({
   const handleSaveCategory = async (e) => {
     e.preventDefault();
     try {
-      mockStore.saveCategory(categoryForm, editingCategory?.id);
+      if (editingCategory?.id) {
+        await updateCategory(editingCategory.id, categoryForm);
+      } else {
+        await createCategory(categoryForm);
+      }
 
       setIsCategoryModalOpen(false);
-      onRefreshData();
+      await onRefreshData();
     } catch (err) {
       alert(err.message);
     }
@@ -179,8 +197,8 @@ export default function AdminDashboard({
   const handleDeleteCategory = async (id) => {
     if (!confirm('¿Deseas eliminar esta categoría y todas sus subcategorías?')) return;
     try {
-      mockStore.deleteCategory(id);
-      onRefreshData();
+      await deleteCategory(id);
+      await onRefreshData();
     } catch (err) {
       alert(err.message);
     }
@@ -191,13 +209,13 @@ export default function AdminDashboard({
     if (!selectedCatForSub || !newSubcategoryName) return;
 
     try {
-      mockStore.addSubcategory({
+      await createSubcategory({
         category_id: selectedCatForSub,
         name: newSubcategoryName,
       });
 
       setNewSubcategoryName('');
-      onRefreshData();
+      await onRefreshData();
     } catch (err) {
       alert(err.message);
     }
@@ -206,8 +224,8 @@ export default function AdminDashboard({
   const handleDeleteSubcategory = async (subId) => {
     if (!confirm('¿Eliminar esta subcategoría?')) return;
     try {
-      mockStore.deleteSubcategory(subId);
-      onRefreshData();
+      await deleteSubcategory(subId);
+      await onRefreshData();
     } catch (err) {
       alert(err.message);
     }
@@ -219,7 +237,7 @@ export default function AdminDashboard({
     setSaveStatus('Guardando cambios...');
 
     try {
-      const updated = mockStore.saveSettings(settingsForm);
+      const updated = await updateStoreSettings(settingsForm);
       updateSettingsState(updated);
       setSaveStatus('¡Ajustes guardados correctamente!');
       setTimeout(() => setSaveStatus(''), 3000);

@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { mockStore } from '../data/mockStore';
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import { getCurrentUser } from '../services/user';
 
 const AuthContext = createContext();
 
@@ -9,25 +9,31 @@ export const AuthProvider = ({ children }) => {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // Check current token on initial mount
+  const logout = () => {
+    setUser(null);
+    setToken(null);
+    localStorage.removeItem('catalog_jwt');
+    setIsLoginModalOpen(false);
+  };
+
   useEffect(() => {
-    const verifyToken = () => {
+    const verifyToken = async () => {
       const storedToken = localStorage.getItem('catalog_jwt');
-      if (storedToken) {
-        try {
-          const storedUser = mockStore.getSession(storedToken);
-          if (!storedUser) {
-            logout();
-          } else {
-            setUser(storedUser);
-            setToken(storedToken);
-          }
-        } catch (err) {
-          console.error('Error al restaurar la sesión local:', err);
-          logout();
-        }
+      if (!storedToken) {
+        setLoading(false);
+        return;
       }
-      setLoading(false);
+
+      try {
+        const storedUser = await getCurrentUser();
+        setUser(storedUser);
+        setToken(storedToken);
+      } catch (error) {
+        console.error('Error al restaurar la sesión:', error);
+        logout();
+      } finally {
+        setLoading(false);
+      }
     };
 
     verifyToken();
@@ -37,13 +43,6 @@ export const AuthProvider = ({ children }) => {
     setUser(userData);
     setToken(authToken);
     localStorage.setItem('catalog_jwt', authToken);
-    setIsLoginModalOpen(false);
-  };
-
-  const logout = () => {
-    setUser(null);
-    setToken(null);
-    localStorage.removeItem('catalog_jwt');
     setIsLoginModalOpen(false);
   };
 

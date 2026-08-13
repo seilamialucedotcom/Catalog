@@ -8,7 +8,8 @@ import ProductModal from './components/ProductModal';
 import CartDrawer from './components/CartDrawer';
 import LoginModal from './components/LoginModal';
 import AdminDashboard from './components/AdminDashboard';
-import { mockStore } from './data/mockStore';
+import { getProducts } from './services/product';
+import { getCatalog } from './services/storesettings';
 
 import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -22,17 +23,19 @@ function MainCatalogApp() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [catalogError, setCatalogError] = useState('');
+  const [productsLoading, setProductsLoading] = useState(false);
+  const [productsError, setProductsError] = useState('');
 
   // Filter States
   const [searchTerm, setSearchTerm] = useState('');
-  const [activeCategory, setActiveCategory] = useState<number | null>(null);
-  const [activeSubcategory, setActiveSubcategory] = useState<number | null>(null);
+  const [activeCategory, setActiveCategory] = useState(null);
+  const [activeSubcategory, setActiveSubcategory] = useState(null);
   const [onlyFeatured, setOnlyFeatured] = useState(false);
 
   // Modal & Drawer States
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAdminOpen, setIsAdminOpen] = useState(false);
-  const [quickViewProduct, setQuickViewProduct] = useState<any | null>(null);
+  const [quickViewProduct, setQuickViewProduct] = useState(null);
 
   // Automatically open Admin Dashboard if user is authenticated as Admin
   useEffect(() => {
@@ -45,8 +48,9 @@ function MainCatalogApp() {
 
   // Fetch initial catalog state
   const loadCatalogData = async () => {
+    setCatalogError('');
     try {
-      const data = mockStore.getCatalog();
+      const data = await getCatalog();
       setSettings(data.settings);
       setCategories(data.categories);
     } catch (err) {
@@ -59,8 +63,10 @@ function MainCatalogApp() {
 
   // Fetch products based on active filters
   const loadProducts = async () => {
+    setProductsLoading(true);
+    setProductsError('');
     try {
-      const data = mockStore.getProducts({
+      const data = await getProducts({
         search: searchTerm,
         category_id: activeCategory,
         subcategory_id: activeSubcategory,
@@ -69,15 +75,24 @@ function MainCatalogApp() {
       setProducts(data);
     } catch (err) {
       console.error('Error al cargar productos:', err);
+      setProductsError(err instanceof Error ? err.message : 'No se pudieron cargar los productos.');
+    } finally {
+      setProductsLoading(false);
     }
   };
 
   useEffect(() => {
-    loadCatalogData();
+    const loadInitialCatalog = async () => {
+      await loadCatalogData();
+    };
+    loadInitialCatalog();
   }, []);
 
   useEffect(() => {
-    loadProducts();
+    const loadFilteredProducts = async () => {
+      await loadProducts();
+    };
+    loadFilteredProducts();
   }, [searchTerm, activeCategory, activeSubcategory, onlyFeatured]);
 
   // Derived active subcategories array
@@ -89,13 +104,13 @@ function MainCatalogApp() {
   const activeCategoryObj = categories.find(c => c.id === activeCategory);
   const activeCategoryName = activeCategoryObj ? activeCategoryObj.name : (onlyFeatured ? 'Productos Destacados' : 'Todos los Productos');
 
-  const handleSelectCategory = (catId: number | null) => {
+  const handleSelectCategory = (catId) => {
     setActiveCategory(catId);
     setActiveSubcategory(null);
     setOnlyFeatured(false);
   };
 
-  const handleSelectSubcategory = (catId: number, subId: number | null) => {
+  const handleSelectSubcategory = (catId, subId) => {
     setActiveCategory(catId);
     setActiveSubcategory(subId);
     setOnlyFeatured(false);
@@ -186,6 +201,14 @@ function MainCatalogApp() {
               onQuickView={(p) => setQuickViewProduct(p)}
               activeCategoryName={activeCategoryName}
             />
+            {productsLoading && (
+              <p className="px-4 pb-4 text-center text-sm text-slate-500">Cargando productos...</p>
+            )}
+            {productsError && (
+              <p className="mx-4 mb-4 rounded-xl border border-rose-300 bg-rose-50 p-3 text-center text-sm text-rose-700">
+                {productsError}
+              </p>
+            )}
           </div>
 
           {/* Clean Minimalist Footer */}
@@ -230,9 +253,8 @@ function MainCatalogApp() {
             onClose={() => setIsAdminOpen(false)}
             products={products}
             categories={categories}
-            onRefreshData={() => {
-              loadCatalogData();
-              loadProducts();
+            onRefreshData={async () => {
+              await Promise.all([loadCatalogData(), loadProducts()]);
             }}
           />
 

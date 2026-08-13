@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { X, Lock, Mail, AlertCircle, ArrowRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { mockStore } from '../data/mockStore';
+import { loginUser, registerUser } from '../services/user';
 
 export default function LoginModal() {
   const { isLoginModalOpen, closeLoginModal, login } = useAuth();
@@ -21,8 +21,8 @@ export default function LoginModal() {
 
     try {
       const data = isRegister
-        ? mockStore.register({ name, email, password })
-        : mockStore.login(email, password);
+        ? await registerUser({ name, email, password })
+        : await loginUser({ email, password });
 
       login(data.user, data.token);
     } catch (err) {
