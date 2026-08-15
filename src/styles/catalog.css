@@ -74,6 +74,37 @@ body {
   background: #1c1c1c;
 }
 
+/* Descripciones enriquecidas de productos (editor y vistas de lectura). */
+.product-rich-text p {
+  margin: 0 0 0.5rem;
+}
+
+.product-rich-text p:last-child,
+.product-rich-text ul:last-child,
+.product-rich-text ol:last-child {
+  margin-bottom: 0;
+}
+
+.product-rich-text ul,
+.product-rich-text ol {
+  margin: 0.25rem 0 0.5rem 1.25rem;
+  padding-left: 0.5rem;
+}
+
+.product-rich-text ul {
+  list-style: disc;
+}
+
+.product-rich-text ol {
+  list-style: decimal;
+}
+
+.rich-text-editor__content:empty::before {
+  color: #64748b;
+  content: attr(data-placeholder);
+  pointer-events: none;
+}
+
 /* Dynamic Accent Glow Effects */
 .btn-primary {
   background: var(--primary-color);

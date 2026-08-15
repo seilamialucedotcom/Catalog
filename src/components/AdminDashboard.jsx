@@ -10,6 +10,8 @@ import {
   Palette,
   Star,
 } from 'lucide-react';
+import { RichTextContent, RichTextDescriptionEditor } from './RichTextDescription';
+import { formatPrice } from '../utils/currency';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import {
@@ -163,7 +165,7 @@ export default function AdminDashboard({
       name: '',
       description: '',
       price: '',
-      category_id: categories[0]?.id || '',
+      category_id: categories[0]?.id ? String(categories[0].id) : '',
       subcategory_id: '',
       image_url: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&auto=format&fit=crop&q=80',
       is_featured: false,
@@ -172,19 +174,30 @@ export default function AdminDashboard({
   };
 
   const handleOpenEditProduct = (prod) => {
+    const categoryId = prod.category_id ? String(prod.category_id) : '';
+    const category = categories.find((item) => String(item.id) === categoryId);
+    const subcategoryId = prod.subcategory_id ? String(prod.subcategory_id) : '';
+    const hasSelectedSubcategory = category?.subcategories?.some(
+      (subcategory) => String(subcategory.id) === subcategoryId,
+    );
+
     setEditingProduct(prod);
     setProductImageStatus('');
     setProductForm({
       name: prod.name || '',
       description: prod.description || '',
       price: prod.price || '',
-      category_id: prod.category_id || '',
-      subcategory_id: prod.subcategory_id || '',
+      category_id: categoryId,
+      subcategory_id: hasSelectedSubcategory ? subcategoryId : '',
       image_url: prod.image_url || '',
       is_featured: Boolean(prod.is_featured),
     });
     setIsProductModalOpen(true);
   };
+
+  const productSubcategories = categories.find(
+    (category) => String(category.id) === String(productForm.category_id),
+  )?.subcategories || [];
 
   const handleSaveProduct = async (e) => {
     e.preventDefault();
@@ -398,7 +411,7 @@ export default function AdminDashboard({
                           />
                           <div>
                             <div className="font-bold text-slate-100">{prod.name}</div>
-                            <div className="text-[10px] text-slate-500 truncate max-w-xs">{prod.description}</div>
+                            <RichTextContent value={prod.description} className="line-clamp-1 max-w-xs text-[10px] text-slate-500" />
                           </div>
                         </td>
                         <td className="py-3 px-4">
@@ -407,7 +420,7 @@ export default function AdminDashboard({
                           </span>
                         </td>
                         <td className="py-3 px-4 font-bold text-[#d99000]">
-                          ${parseFloat(prod.price).toFixed(2)}
+                          {formatPrice(prod.price)}
                         </td>
                         <td className="py-3 px-4">
                           {prod.is_featured ? (
@@ -756,16 +769,14 @@ export default function AdminDashboard({
 
               <div>
                 <label className="text-xs text-slate-300 block mb-1">Descripción</label>
-                <textarea
-                  rows={3}
+                <RichTextDescriptionEditor
                   value={productForm.description}
-                  onChange={(e) => setProductForm({ ...productForm, description: e.target.value })}
-                  className="w-full bg-[#242424] border border-[#333333] text-slate-100 text-xs rounded-xl p-2.5 focus:border-[#d99000] focus:outline-none"
+                  onChange={(description) => setProductForm((current) => ({ ...current, description }))}
                 />
               </div>
 
               <div>
-                <label className="text-xs text-slate-300 block mb-1">Precio ($)</label>
+                <label className="text-xs text-slate-300 block mb-1">Precio (S/)</label>
                 <input
                   type="number"
                   step="0.01"
@@ -780,13 +791,34 @@ export default function AdminDashboard({
                 <label className="text-xs text-slate-300 block mb-1">Categoría</label>
                 <select
                   value={productForm.category_id}
-                  onChange={(e) => setProductForm({ ...productForm, category_id: e.target.value })}
+                  onChange={(e) => setProductForm((current) => ({
+                    ...current,
+                    category_id: e.target.value,
+                    subcategory_id: '',
+                  }))}
                   className="w-full bg-[#242424] border border-[#333333] text-slate-200 text-xs rounded-xl p-2.5 focus:border-[#d99000] focus:outline-none"
                   required
                 >
                   <option value="">-- Seleccionar Categoría --</option>
                   {categories.map((c) => (
                     <option key={c.id} value={c.id}>{c.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="text-xs text-slate-300 block mb-1">Subcategoría</label>
+                <select
+                  value={productForm.subcategory_id}
+                  onChange={(e) => setProductForm((current) => ({ ...current, subcategory_id: e.target.value }))}
+                  disabled={!productForm.category_id || productSubcategories.length === 0}
+                  className="w-full bg-[#242424] border border-[#333333] text-slate-200 text-xs rounded-xl p-2.5 focus:border-[#d99000] focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <option value="">
+                    {productForm.category_id ? '-- Sin subcategoría --' : '-- Selecciona una categoría primero --'}
+                  </option>
+                  {productSubcategories.map((subcategory) => (
+                    <option key={subcategory.id} value={String(subcategory.id)}>{subcategory.name}</option>
                   ))}
                 </select>
               </div>

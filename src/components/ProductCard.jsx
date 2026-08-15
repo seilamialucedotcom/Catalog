@@ -2,6 +2,7 @@ import React from 'react';
 import { Eye, Star, MessageCircle } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useTheme } from '../context/ThemeContext';
+import { formatPrice } from '../utils/currency';
 
 export default function ProductCard({ product, onQuickView }) {
   const { addToCart } = useCart();
@@ -10,7 +11,7 @@ export default function ProductCard({ product, onQuickView }) {
   const handleWhatsAppDirect = (e) => {
     e.stopPropagation();
     const number = (settings.whatsapp_number || '+573001234567').replace(/[^0-9+]/g, '');
-    const text = `¡Hola! Me interesa solicitar información sobre el producto *${product.name}* (Precio: $${parseFloat(product.price).toFixed(2)}). ¿Tienen disponibilidad?`;
+    const text = `¡Hola! Me interesa solicitar información sobre el producto *${product.name}* (Precio: ${formatPrice(product.price)}). ¿Tienen disponibilidad?`;
     window.open(`https://wa.me/${number}?text=${encodeURIComponent(text)}`, '_blank');
   };
 
@@ -76,7 +77,7 @@ export default function ProductCard({ product, onQuickView }) {
         {/* Price & Solid Gold 'Agregar' Button */}
         <div className="mt-4 pt-3 flex items-center justify-between gap-2">
           <span className="text-lg sm:text-xl font-black text-[#ca8a04] group-hover:scale-105 origin-left transition-transform duration-200">
-            ${parseFloat(product.price).toFixed(2)}
+            {formatPrice(product.price)}
           </span>
 
           <button

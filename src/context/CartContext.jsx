@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { formatPrice } from '../utils/currency';
 
 const CartContext = createContext();
 
@@ -62,10 +63,10 @@ export const CartProvider = ({ children, whatsappNumber, storeName }) => {
     let text = `¡Hola! Me interesa solicitar información o realizar un pedido en *${storeName || 'Catálogo Digital'}*:\n\n`;
 
     cartItems.forEach((item, index) => {
-      text += `${index + 1}. *${item.name}* x${item.quantity} - $${(item.price * item.quantity).toFixed(2)}\n`;
+      text += `${index + 1}. *${item.name}* x${item.quantity} - ${formatPrice(item.price * item.quantity)}\n`;
     });
 
-    text += `\n💰 *Total Estimado:* $${totalAmount.toFixed(2)}`;
+    text += `\n💰 *Total Estimado:* ${formatPrice(totalAmount)}`;
 
     if (customNote.trim()) {
       text += `\n\n📝 *Nota:* ${customNote.trim()}`;

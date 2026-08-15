@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { X, ShoppingBag, MessageCircle, CheckCircle, Star, Plus, Minus, ShieldCheck } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useTheme } from '../context/ThemeContext';
+import { RichTextContent } from './RichTextDescription';
+import { formatPrice } from '../utils/currency';
 
 export default function ProductModal({ product, onClose }) {
   const [quantity, setQuantity] = useState(1);
@@ -12,11 +14,11 @@ export default function ProductModal({ product, onClose }) {
 
   const handleWhatsAppOrder = () => {
     const number = (settings.whatsapp_number || '+573001234567').replace(/[^0-9+]/g, '');
-    const totalPrice = (product.price * quantity).toFixed(2);
+    const totalPrice = formatPrice(product.price * quantity);
     const text = `¡Hola! Me gustaría pedir el siguiente producto de *${settings.store_name}*:\n\n` +
       `📦 *Producto:* ${product.name}\n` +
       `🔢 *Cantidad:* ${quantity}\n` +
-      `💰 *Precio Total:* $${totalPrice}\n\n` +
+      `💰 *Precio Total:* ${totalPrice}\n\n` +
       `¿Me apuntas los datos de envío, por favor?`;
 
     window.open(`https://wa.me/${number}?text=${encodeURIComponent(text)}`, '_blank');
@@ -76,13 +78,14 @@ export default function ProductModal({ product, onClose }) {
 
               {/* Price */}
               <div className="text-2xl font-black text-[#d99000] mb-4">
-                ${parseFloat(product.price).toFixed(2)}
+                {formatPrice(product.price)}
               </div>
 
               {/* Description */}
-              <p className="text-xs sm:text-sm text-slate-300 leading-relaxed mb-6 bg-[#242424] p-3 rounded-xl border border-[#333333]">
-                {product.description || 'Producto de alta calidad seleccionado especialmente para ti.'}
-              </p>
+              <RichTextContent
+                value={product.description || 'Producto de alta calidad seleccionado especialmente para ti.'}
+                className="mb-6 rounded-xl border border-[#333333] bg-[#242424] p-3 text-xs leading-relaxed text-slate-300 sm:text-sm"
+              />
 
               {/* Quantity Counter Selector */}
               <div className="mb-6">
@@ -109,7 +112,7 @@ export default function ProductModal({ product, onClose }) {
                   </div>
 
                   <span className="text-xs text-slate-400">
-                    Subtotal: <strong className="text-[#d99000]">${(product.price * quantity).toFixed(2)}</strong>
+                    Subtotal: <strong className="text-[#d99000]">{formatPrice(product.price * quantity)}</strong>
                   </span>
                 </div>
               </div>

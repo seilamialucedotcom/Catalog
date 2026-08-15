@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { X, Trash2, Plus, Minus, MessageCircle, ShoppingBag, ArrowRight } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useTheme } from '../context/ThemeContext';
+import { formatPrice } from '../utils/currency';
 
 export default function CartDrawer() {
   const {
@@ -76,7 +77,7 @@ export default function CartDrawer() {
                       {item.name}
                     </h4>
                     <span className="text-xs text-[#d99000] font-extrabold block mt-0.5">
-                      ${(item.price * item.quantity).toFixed(2)}
+                      {formatPrice(item.price * item.quantity)}
                     </span>
 
                     {/* Quantity Controls */}
@@ -142,7 +143,7 @@ export default function CartDrawer() {
               <div className="flex items-center justify-between text-sm pt-2 border-t border-slate-800/80">
                 <span className="text-slate-400 font-medium">Total Estimado:</span>
                 <span className="text-xl font-extrabold text-[#d99000]">
-                  ${totalAmount.toFixed(2)}
+                  {formatPrice(totalAmount)}
                 </span>
               </div>
 
