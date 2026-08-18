@@ -7,6 +7,11 @@ import { formatPrice } from '../utils/currency';
 export default function ProductCard({ product, onQuickView }) {
   const { addToCart } = useCart();
   const { settings } = useTheme();
+  const stock = product.stock === null || product.stock === undefined || product.stock === ''
+    ? null
+    : Number(product.stock);
+  const isOutOfStock = stock === 0;
+  const brandName = product.brand?.name || product.brand_name || '';
 
   const handleWhatsAppDirect = (e) => {
     e.stopPropagation();
@@ -52,15 +57,15 @@ export default function ProductCard({ product, onQuickView }) {
 
         {/* Stacked Badges Top Left as in reference image */}
         <div className="absolute top-2.5 left-2.5 flex flex-col items-start gap-1 z-10">
+          {product.category_name && (
+            <span className="bg-[#181818] text-white text-[10px] sm:text-[11px] font-bold px-2 py-0.5 rounded-sm tracking-wide shadow-sm">
+              {product.category_name}
+            </span>
+          )}
           {product.is_featured && (
             <span className="bg-[#c88216] text-white text-[10px] sm:text-[11px] font-bold px-2 py-0.5 rounded-sm uppercase tracking-wider flex items-center gap-1 shadow-sm animate-badge-shimmer">
               <Star className="w-3 h-3 fill-current animate-spin-slow" />
               DESTACADO
-            </span>
-          )}
-          {product.category_name && (
-            <span className="bg-[#181818] text-white text-[10px] sm:text-[11px] font-bold px-2 py-0.5 rounded-sm tracking-wide shadow-sm">
-              {product.category_name}
             </span>
           )}
         </div>
@@ -69,9 +74,21 @@ export default function ProductCard({ product, onQuickView }) {
       {/* Product Content Info */}
       <div className="p-4 flex-1 flex flex-col justify-between bg-white">
         <div>
+          {brandName && (
+            <p className="mb-1 text-[10px] font-bold uppercase tracking-[0.14em] text-slate-500">
+              {brandName}
+            </p>
+          )}
           <h3 className="text-sm sm:text-base font-bold text-[#181818] group-hover:text-[#d99000] transition-colors duration-200 line-clamp-2 leading-snug">
             {product.name}
           </h3>
+          <p className={`mt-2 text-xs font-semibold ${isOutOfStock ? 'text-rose-600' : 'text-emerald-600'}`}>
+            {isOutOfStock
+              ? '✖ Agotado'
+              : stock === null
+                ? '✔ En stock'
+                : `✔ Disponibilidad: ${stock} ${stock === 1 ? 'unidad' : 'unidades'}`}
+          </p>
         </div>
 
         {/* Price & Solid Gold 'Agregar' Button */}
@@ -81,11 +98,14 @@ export default function ProductCard({ product, onQuickView }) {
           </span>
 
           <button
+            type="button"
+            disabled={isOutOfStock}
             onClick={(e) => {
               e.stopPropagation();
+              if (isOutOfStock) return;
               addToCart(product);
             }}
-            className="bg-[#ca8a04] hover:bg-[#b47703] active:scale-90 text-white text-xs font-bold px-4 py-1.5 rounded transition-all duration-200 cursor-pointer shadow-sm hover:shadow-md hover:-translate-y-0.5"
+            className="bg-[#ca8a04] hover:bg-[#b47703] active:scale-90 text-white text-xs font-bold px-4 py-1.5 rounded transition-all duration-200 cursor-pointer shadow-sm hover:shadow-md hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500 disabled:shadow-none disabled:transform-none"
           >
             Agregar
           </button>

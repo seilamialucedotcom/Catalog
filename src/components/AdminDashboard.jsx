@@ -16,6 +16,7 @@ import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import {
   createCategory,
+  createBrand,
   createProduct,
   createSubcategory,
   deleteCategory,
@@ -24,6 +25,7 @@ import {
   updateCategory,
   updateProduct,
   updateStoreSettings,
+  getBrands,
 } from '../services/admin';
 
 export default function AdminDashboard({
@@ -47,6 +49,9 @@ export default function AdminDashboard({
     price: '',
     category_id: '',
     subcategory_id: '',
+    brand_id: '',
+    brand_name: '',
+    stock: '',
     image_url: '',
     is_featured: false,
   });
@@ -77,6 +82,7 @@ export default function AdminDashboard({
   const [saveStatus, setSaveStatus] = useState('');
   const [productImageStatus, setProductImageStatus] = useState('');
   const [categoryImageStatus, setCategoryImageStatus] = useState('');
+  const [brands, setBrands] = useState([]);
 
   const handleImageUpload = (event, setImageUrl, setStatus) => {
     const file = event.target.files?.[0];
@@ -150,6 +156,14 @@ export default function AdminDashboard({
     }
   }, [isOpen, settings]);
 
+  useEffect(() => {
+    if (!isOpen) return;
+
+    getBrands().then(setBrands).catch((error) => {
+      console.error('Error al cargar marcas:', error);
+    });
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   const handleLogout = () => {
@@ -167,6 +181,9 @@ export default function AdminDashboard({
       price: '',
       category_id: categories[0]?.id ? String(categories[0].id) : '',
       subcategory_id: '',
+      brand_id: '',
+      brand_name: '',
+      stock: '',
       image_url: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&auto=format&fit=crop&q=80',
       is_featured: false,
     });
@@ -189,6 +206,9 @@ export default function AdminDashboard({
       price: prod.price || '',
       category_id: categoryId,
       subcategory_id: hasSelectedSubcategory ? subcategoryId : '',
+      brand_id: prod.brand_id ? String(prod.brand_id) : '',
+      brand_name: prod.brand?.name || '',
+      stock: prod.stock ?? '',
       image_url: prod.image_url || '',
       is_featured: Boolean(prod.is_featured),
     });
@@ -202,10 +222,29 @@ export default function AdminDashboard({
   const handleSaveProduct = async (e) => {
     e.preventDefault();
     try {
+      const brandName = productForm.brand_name.trim();
+      let brandId = productForm.brand_id || null;
+
+      if (brandName) {
+        const existingBrand = brands.find(
+          (brand) => brand.name.toLocaleLowerCase() === brandName.toLocaleLowerCase(),
+        );
+        const brand = existingBrand || await createBrand({ name: brandName });
+        brandId = brand.id;
+        if (!existingBrand) setBrands((current) => [...current, brand].sort((a, b) => a.name.localeCompare(b.name)));
+      }
+
+      const { brand_name, ...formData } = productForm;
+      const payload = {
+        ...formData,
+        brand_id: brandId,
+        stock: productForm.stock === '' ? null : Number(productForm.stock),
+      };
+
       if (editingProduct?.id) {
-        await updateProduct(editingProduct.id, productForm);
+        await updateProduct(editingProduct.id, payload);
       } else {
-        await createProduct(productForm);
+        await createProduct(payload);
       }
 
       setIsProductModalOpen(false);
@@ -785,6 +824,52 @@ export default function AdminDashboard({
                   onChange={(e) => setProductForm({ ...productForm, price: e.target.value })}
                   className="w-full bg-[#242424] border border-[#333333] text-slate-100 text-xs rounded-xl p-2.5 focus:border-[#d99000] focus:outline-none"
                 />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs text-slate-300 block mb-1">Marca</label>
+                  <input
+                    type="text"
+                    list="product-brand-options"
+                    value={productForm.brand_name}
+                    onChange={(e) => {
+                      const brandName = e.target.value;
+                      const selectedBrand = brands.find(
+                        (brand) => brand.name.toLocaleLowerCase() === brandName.trim().toLocaleLowerCase(),
+                      );
+                      setProductForm((current) => ({
+                        ...current,
+                        brand_name: brandName,
+                        brand_id: selectedBrand ? String(selectedBrand.id) : '',
+                      }));
+                    }}
+                    placeholder="Selecciona o escribe una marca"
+                    className="w-full bg-[#242424] border border-[#333333] text-slate-100 text-xs rounded-xl p-2.5 focus:border-[#d99000] focus:outline-none"
+                  />
+                  <datalist id="product-brand-options">
+                    {brands.map((brand) => <option key={brand.id} value={brand.name} />)}
+                  </datalist>
+                  {productForm.brand_name.trim() && !brands.some(
+                    (brand) => brand.name.toLocaleLowerCase() === productForm.brand_name.trim().toLocaleLowerCase(),
+                  ) && (
+                    <p className="mt-1 text-[10px] text-[#d99000]">Se crearÃ¡ esta marca al guardar.</p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="text-xs text-slate-300 block mb-1">Stock</label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="1"
+                    value={productForm.stock}
+                    onChange={(e) => setProductForm((current) => ({ ...current, stock: e.target.value }))}
+                    placeholder="VacÃ­o = en stock"
+                    className="w-full bg-[#242424] border border-[#333333] text-slate-100 text-xs rounded-xl p-2.5 focus:border-[#d99000] focus:outline-none"
+                  />
+                  <p className="mt-1 text-[10px] text-slate-500">DÃ©jalo vacÃ­o para enviar <code>null</code>.</p>
+                </div>
               </div>
 
               <div>
