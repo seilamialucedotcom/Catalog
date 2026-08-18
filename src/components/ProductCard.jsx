@@ -1,5 +1,5 @@
 import React from 'react';
-import { Eye, Star, MessageCircle } from 'lucide-react';
+import { CircleCheck, CircleX, Eye, Star, MessageCircle } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useTheme } from '../context/ThemeContext';
 import { formatPrice } from '../utils/currency';
@@ -82,12 +82,26 @@ export default function ProductCard({ product, onQuickView }) {
           <h3 className="text-sm sm:text-base font-bold text-[#181818] group-hover:text-[#d99000] transition-colors duration-200 line-clamp-2 leading-snug">
             {product.name}
           </h3>
-          <p className={`mt-2 text-xs font-semibold ${isOutOfStock ? 'text-rose-600' : 'text-emerald-600'}`}>
+          <p className="mt-2 flex items-center gap-1.5 text-xs font-semibold text-black">
+            {isOutOfStock ? (
+              <CircleX className="h-4 w-4 shrink-0 text-red-600" aria-hidden="true" />
+            ) : (
+              <CircleCheck className="h-4 w-4 shrink-0 text-emerald-600" aria-hidden="true" />
+            )}
+            <span>
+              {isOutOfStock
+                ? 'Agotado'
+                : stock === null
+                  ? 'En stock'
+                  : `Disponibilidad: ${stock} ${stock === 1 ? 'unidad' : 'unidades'}`}
+            </span>
+            <span className="sr-only" aria-hidden="true">
             {isOutOfStock
               ? '✖ Agotado'
               : stock === null
                 ? '✔ En stock'
                 : `✔ Disponibilidad: ${stock} ${stock === 1 ? 'unidad' : 'unidades'}`}
+            </span>
           </p>
         </div>
 
