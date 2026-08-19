@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { Bold, Highlighter, Italic, List, ListOrdered } from 'lucide-react';
+import { Bold, Highlighter, Italic, List, ListOrdered, Underline } from 'lucide-react';
 
 const allowedTags = {
   P: 'p',
@@ -12,6 +12,8 @@ const allowedTags = {
   OL: 'ol',
   LI: 'li',
   MARK: 'mark',
+  U: 'u',
+  UNDERLINE: 'u',
 };
 
 const ignoredTags = new Set(['SCRIPT', 'STYLE', 'IFRAME', 'OBJECT', 'EMBED', 'LINK', 'META', 'SVG', 'MATH']);
@@ -97,6 +99,7 @@ export function RichTextDescriptionEditor({ value, onChange }) {
   const tools = [
     { command: 'bold', label: 'Negrita', Icon: Bold },
     { command: 'italic', label: 'Cursiva', Icon: Italic },
+    { command: 'underline', label: 'Subrayado', Icon: Underline },
     { command: 'hiliteColor', value: '#facc15', label: 'Resaltar en amarillo', Icon: Highlighter },
     { command: 'insertUnorderedList', label: 'Lista con viñetas', Icon: List },
     { command: 'insertOrderedList', label: 'Lista numerada', Icon: ListOrdered },

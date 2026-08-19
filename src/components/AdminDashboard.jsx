@@ -780,9 +780,9 @@ export default function AdminDashboard({
 
       {/* CREATE/EDIT PRODUCT MODAL */}
       {isProductModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/70 p-4 backdrop-blur-md sm:p-6">
-          <div className="my-auto max-h-[calc(100vh-2rem)] w-full max-w-lg overflow-y-auto rounded-2xl border border-[#2a2a2a] bg-[#181818] p-6 space-y-4">
-            <div className="sticky top-0 z-10 -mx-6 -mt-6 mb-4 flex items-center justify-between border-b border-[#2a2a2a] bg-[#181818] px-6 pb-3 pt-6">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-md sm:p-6 overflow-auto">
+          <div className="w-full max-w-lg max-h-[calc(100vh-2rem)] rounded-2xl border border-[#2a2a2a] bg-[#181818] overflow-hidden">
+            <div className="flex items-center justify-between border-b border-[#2a2a2a] px-6 py-4 bg-[#181818]">
               <h3 className="text-base font-bold text-white">
                 {editingProduct ? 'Editar Producto' : 'Crear Nuevo Producto'}
               </h3>
@@ -797,7 +797,8 @@ export default function AdminDashboard({
               </button>
             </div>
 
-            <form onSubmit={handleSaveProduct} className="space-y-3">
+            <div className="p-6 space-y-3 overflow-y-auto max-h-[calc(100vh-6rem)]">
+              <form onSubmit={handleSaveProduct} className="space-y-3">
               <div>
                 <label className="text-xs text-slate-300 block mb-1">Nombre del Producto</label>
                 <input
