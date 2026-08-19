@@ -999,6 +999,7 @@ export default function AdminDashboard({
             </form>
           </div>
         </div>
+        </div>
       )}
 
       {/* CREATE/EDIT CATEGORY MODAL */}
