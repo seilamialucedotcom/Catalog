@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Bold, Highlighter, Italic, List, ListOrdered, Underline } from 'lucide-react';
 
 const allowedTags = {
@@ -68,6 +68,7 @@ export function RichTextContent({ value, className = '' }) {
 
 export function RichTextDescriptionEditor({ value, onChange }) {
   const editorRef = useRef(null);
+  const [activeCommands, setActiveCommands] = useState({});
 
   useEffect(() => {
     const editor = editorRef.current;
@@ -83,10 +84,90 @@ export function RichTextDescriptionEditor({ value, onChange }) {
     onChange(html);
   };
 
+  const updateActiveStates = () => {
+    const editor = editorRef.current;
+    const sel = typeof window !== 'undefined' ? window.getSelection() : null;
+    if (!editor || !sel || !sel.anchorNode) {
+      setActiveCommands((prev) => ({ ...prev, bold: false, italic: false, underline: false, insertUnorderedList: false, insertOrderedList: false, hiliteColor: false }));
+      return;
+    }
+
+    const isInside = editor.contains(sel.anchorNode) || editor.contains(sel.focusNode);
+    if (!isInside) return;
+
+    const states = {
+      bold: document.queryCommandState('bold'),
+      italic: document.queryCommandState('italic'),
+      insertUnorderedList: document.queryCommandState('insertUnorderedList'),
+      insertOrderedList: document.queryCommandState('insertOrderedList'),
+    };
+
+    // underline: prefer queryCommandState, but fallback to detecting <u> ancestors
+    let underlineState = false;
+    try {
+      underlineState = document.queryCommandState('underline');
+    } catch (e) {
+      underlineState = false;
+    }
+    if (!underlineState) {
+      const anchorNode = sel.anchorNode;
+      const focusNode = sel.focusNode;
+      const nodeHasU = (node) => {
+        if (!node) return false;
+        if (node.nodeType === 3) node = node.parentElement;
+        return !!(node && node.closest && node.closest('u'));
+      };
+      if (nodeHasU(anchorNode) || nodeHasU(focusNode)) underlineState = true;
+    }
+    states.underline = underlineState;
+
+    let hilite = false;
+    try {
+      const val = document.queryCommandValue('hiliteColor') || document.queryCommandValue('backColor');
+      if (val && String(val).trim() && val !== 'transparent' && val !== 'none') hilite = true;
+    } catch (e) {
+      // ignore
+    }
+    states.hiliteColor = hilite;
+
+    setActiveCommands(states);
+  };
+
+  useEffect(() => {
+    // update when selection or mouse/keyboard interaction changes
+    document.addEventListener('selectionchange', updateActiveStates);
+    document.addEventListener('keyup', updateActiveStates);
+    document.addEventListener('mouseup', updateActiveStates);
+    return () => {
+      document.removeEventListener('selectionchange', updateActiveStates);
+      document.removeEventListener('keyup', updateActiveStates);
+      document.removeEventListener('mouseup', updateActiveStates);
+    };
+  }, []);
+
   const applyFormat = (command, value = null) => {
     editorRef.current?.focus();
+
+    // Fallback for underline if execCommand is not supported
+    if (command === 'underline' && !(document.queryCommandSupported && document.queryCommandSupported('underline'))) {
+      const sel = typeof window !== 'undefined' ? window.getSelection() : null;
+      if (sel && sel.rangeCount) {
+        const range = sel.getRangeAt(0);
+        if (!range.collapsed) {
+          const u = document.createElement('u');
+          u.appendChild(range.extractContents());
+          range.insertNode(u);
+          commit();
+          setTimeout(updateActiveStates, 0);
+          return;
+        }
+      }
+    }
+
     document.execCommand(command, false, value);
+    // commit changes and refresh active state after the browser applies the command
     commit();
+    setTimeout(updateActiveStates, 0);
   };
 
   const pastePlainText = (event) => {
@@ -116,7 +197,7 @@ export function RichTextDescriptionEditor({ value, onChange }) {
             aria-label={label}
             onMouseDown={(event) => event.preventDefault()}
             onClick={() => applyFormat(command, toolValue)}
-            className="rounded-lg p-1.5 text-slate-300 transition-colors hover:bg-[#363636] hover:text-[#d99000] focus:outline-none focus:ring-1 focus:ring-[#d99000]"
+            className={`rounded-lg p-1.5 text-slate-300 transition-colors hover:bg-[#363636] hover:text-[#d99000] focus:outline-none focus:ring-1 focus:ring-[#d99000] ${activeCommands[command] ? 'bg-[#363636] text-[#d99000]' : ''}`}
           >
             <Icon className="h-4 w-4" />
           </button>
@@ -128,7 +209,7 @@ export function RichTextDescriptionEditor({ value, onChange }) {
         role="textbox"
         aria-multiline="true"
         data-placeholder="Escribe la descripción del producto"
-        onInput={commit}
+        onInput={() => { commit(); updateActiveStates(); }}
         onPaste={pastePlainText}
         className="product-rich-text rich-text-editor__content min-h-24 p-2.5 text-xs leading-relaxed text-slate-100 outline-none"
       />

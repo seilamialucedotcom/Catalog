@@ -293,3 +293,48 @@ body {
 .animate-badge-shimmer {
   animation: badgeShimmer 2.5s infinite ease-in-out;
 }
+
+/* Modal & Scrollbar Utilities */
+/* Full-viewport modal overlay/backdrop */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999; /* asegurarse que esté por encima de todo */
+  background: rgba(0,0,0,0.7);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Scrollable modal content area: max height and internal scrolling */
+.modal-scrollable {
+  max-height: calc(100vh - 4rem); /* ajustable */
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Hide scrollbars visually while preserving scroll functionality */
+.hide-scrollbar {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE 10+ */
+}
+.hide-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+/* Sticky header inside scrollable modal: mantener encima del contenido */
+.modal-scrollable .modal-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: #181818; /* coincide con fondo del modal */
+  border-bottom: 1px solid #2a2a2a;
+}
+
+/* When modal is open, prevent body scroll (fallback) */
+.body-modal-open {
+  overflow: hidden !important;
+  touch-action: none;
+}

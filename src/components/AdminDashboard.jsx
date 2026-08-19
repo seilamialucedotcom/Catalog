@@ -164,6 +164,28 @@ export default function AdminDashboard({
     });
   }, [isOpen]);
 
+  // Bloqueo de scroll del body cuando cualquier modal administrativo esté abierto
+  useEffect(() => {
+    const anyModalOpen = isProductModalOpen || isCategoryModalOpen;
+    const className = 'body-modal-open';
+
+    if (anyModalOpen) {
+      // Preferimos añadir una clase para permitir override CSS (y mantener estilos per-vista)
+      document.body.classList.add(className);
+      // También aplicamos style como respaldo para navegadores que no respeten la clase
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.classList.remove(className);
+      document.body.style.overflow = '';
+    }
+
+    // Cleanup por si el componente se desmonta
+    return () => {
+      document.body.classList.remove(className);
+      document.body.style.overflow = '';
+    };
+  }, [isProductModalOpen, isCategoryModalOpen]);
+
   if (!isOpen) return null;
 
   const handleLogout = () => {
