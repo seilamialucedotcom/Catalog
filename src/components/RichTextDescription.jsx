@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { Bold, Italic, List, ListOrdered } from 'lucide-react';
+import { Bold, Highlighter, Italic, List, ListOrdered } from 'lucide-react';
 
 const allowedTags = {
   P: 'p',
@@ -11,6 +11,7 @@ const allowedTags = {
   UL: 'ul',
   OL: 'ol',
   LI: 'li',
+  MARK: 'mark',
 };
 
 const ignoredTags = new Set(['SCRIPT', 'STYLE', 'IFRAME', 'OBJECT', 'EMBED', 'LINK', 'META', 'SVG', 'MATH']);
@@ -44,7 +45,9 @@ export function sanitizeRichText(value) {
     }
     if (node.nodeType !== Node.ELEMENT_NODE) return;
 
-    const tag = allowedTags[node.tagName];
+    const tag = node.tagName === 'SPAN' && node.style.backgroundColor
+      ? 'mark'
+      : allowedTags[node.tagName];
     if (ignoredTags.has(node.tagName)) return;
 
     const destination = tag ? document.createElement(tag) : parent;
@@ -78,9 +81,9 @@ export function RichTextDescriptionEditor({ value, onChange }) {
     onChange(html);
   };
 
-  const applyFormat = (command) => {
+  const applyFormat = (command, value = null) => {
     editorRef.current?.focus();
-    document.execCommand(command, false);
+    document.execCommand(command, false, value);
     commit();
   };
 
@@ -94,6 +97,7 @@ export function RichTextDescriptionEditor({ value, onChange }) {
   const tools = [
     { command: 'bold', label: 'Negrita', Icon: Bold },
     { command: 'italic', label: 'Cursiva', Icon: Italic },
+    { command: 'hiliteColor', value: '#facc15', label: 'Resaltar en amarillo', Icon: Highlighter },
     { command: 'insertUnorderedList', label: 'Lista con viñetas', Icon: List },
     { command: 'insertOrderedList', label: 'Lista numerada', Icon: ListOrdered },
   ];
@@ -101,14 +105,14 @@ export function RichTextDescriptionEditor({ value, onChange }) {
   return (
     <div className="rich-text-editor rounded-xl border border-[#333333] bg-[#242424] focus-within:border-[#d99000]">
       <div className="flex items-center gap-1 border-b border-[#333333] p-1.5" role="toolbar" aria-label="Formato de descripción">
-        {tools.map(({ command, label, Icon }) => (
+        {tools.map(({ command, value: toolValue, label, Icon }) => (
           <button
             key={command}
             type="button"
             title={label}
             aria-label={label}
             onMouseDown={(event) => event.preventDefault()}
-            onClick={() => applyFormat(command)}
+            onClick={() => applyFormat(command, toolValue)}
             className="rounded-lg p-1.5 text-slate-300 transition-colors hover:bg-[#363636] hover:text-[#d99000] focus:outline-none focus:ring-1 focus:ring-[#d99000]"
           >
             <Icon className="h-4 w-4" />

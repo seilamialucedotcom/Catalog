@@ -780,15 +780,18 @@ export default function AdminDashboard({
 
       {/* CREATE/EDIT PRODUCT MODAL */}
       {isProductModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md overflow-y-auto">
-          <div className="bg-[#181818] border border-[#2a2a2a] rounded-2xl max-w-lg w-full p-6 space-y-4 my-8">
-            <div className="flex items-center justify-between border-b border-[#2a2a2a] pb-3">
+        <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/70 p-4 backdrop-blur-md sm:p-6">
+          <div className="my-auto max-h-[calc(100vh-2rem)] w-full max-w-lg overflow-y-auto rounded-2xl border border-[#2a2a2a] bg-[#181818] p-6 space-y-4">
+            <div className="sticky top-0 z-10 -mx-6 -mt-6 mb-4 flex items-center justify-between border-b border-[#2a2a2a] bg-[#181818] px-6 pb-3 pt-6">
               <h3 className="text-base font-bold text-white">
                 {editingProduct ? 'Editar Producto' : 'Crear Nuevo Producto'}
               </h3>
               <button
+                type="button"
                 onClick={() => setIsProductModalOpen(false)}
-                className="text-slate-400 hover:text-white cursor-pointer"
+                title="Cerrar formulario"
+                aria-label="Cerrar formulario"
+                className="rounded-full p-1.5 text-slate-300 transition-colors hover:bg-[#303030] hover:text-white focus:outline-none focus:ring-1 focus:ring-[#d99000] cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
