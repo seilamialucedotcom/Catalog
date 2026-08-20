@@ -16,7 +16,7 @@ export default function Header({
   const { user, isAdmin, openLoginModal, logout } = useAuth();
   const { totalItemsCount, openCart } = useCart();
 
-  // Helper to render brand name with gold highlighting as seen in image "Aura CyberCatalog"
+  // Helper to render brand name with gold highlighting
   const renderBrandName = (name) => {
     if (!name) return <span className="text-white">Aura <span className="text-[#d99000]">CyberCatalog</span></span>;
     const parts = name.split(' ');
@@ -33,10 +33,10 @@ export default function Header({
 
   return (
     <header className="sticky top-0 z-30 w-full bg-[#181818] border-b border-[#2a2a2a] shadow-md transition-all">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-4">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center gap-2 sm:gap-4">
         
         {/* Left: Hamburger Menu & Brand Logo */}
-        <div className="flex items-center gap-3">
+        <div className="flex shrink-0 items-center gap-2 sm:gap-3">
           <button
             onClick={onOpenMenu}
             className="p-2 sm:p-2.5 rounded-lg bg-[#181818] hover:bg-[#252525] active:scale-95 border border-[#383838] text-white transition-all cursor-pointer hover:border-[#d99000]/50"
@@ -50,22 +50,23 @@ export default function Header({
             onClick={resetFilters}
             className="flex items-center gap-2.5 cursor-pointer group"
           >
+            {/* LOGO LIMPIO SIN BORDES NI FONDOS AGREGADOS */}
             {settings.logo_url ? (
-              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg overflow-hidden border border-[#d99000]/40 p-0.5 bg-[#181818] shadow-md group-hover:scale-105 group-hover:rotate-1 transition-all duration-300">
-                <img
-                  src={settings.logo_url}
-                  alt={settings.store_name}
-                  className="w-full h-full object-cover rounded"
-                />
-              </div>
+              <img
+                src={settings.logo_url}
+                alt={settings.store_name}
+                className="h-9 sm:h-11 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
+              />
             ) : (
-              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-[#d99000] flex items-center justify-center text-white font-black text-lg shadow-md group-hover:scale-105 group-hover:rotate-1 transition-all duration-300">
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-[#d99000] flex items-center justify-center text-white font-black text-lg shadow-md group-hover:scale-105 transition-all duration-300">
                 A
               </div>
             )}
+
+            {/* NOMBRE MOSTRADO EN CELULAR Y ESCRITORIO (SE QUITÓ 'hidden sm:block') */}
             <div className="hidden sm:block">
               <div className="flex items-center gap-1.5">
-                <h1 className="text-base sm:text-lg font-extrabold tracking-tight leading-none group-hover:text-[#d99000] transition-colors">
+                <h1 className="text-sm sm:text-lg font-extrabold tracking-tight leading-none group-hover:text-[#d99000] transition-colors">
                   {renderBrandName(settings.store_name)}
                 </h1>
                 <span className="relative flex h-2 w-2" title="Catálogo En Línea">
@@ -78,15 +79,15 @@ export default function Header({
         </div>
 
         {/* Center: Quick Search Input Bar */}
-        <div className="flex-1 max-w-xl hidden md:block">
+        <div className="min-w-0 flex-1 md:max-w-xl">
           <div className="relative">
             <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder=""
-              className="w-full bg-white border border-slate-200 text-slate-900 text-sm rounded-md pl-10 pr-4 py-2 shadow-inner focus:outline-none focus:ring-2 focus:ring-[#d99000] transition-all"
+              placeholder="Buscar productos..."
+              className="w-full bg-white border border-slate-200 text-slate-900 text-sm rounded-md pl-9 sm:pl-10 pr-4 py-2 shadow-inner focus:outline-none focus:ring-2 focus:ring-[#d99000] transition-all"
             />
             {searchTerm && (
               <button
@@ -100,8 +101,8 @@ export default function Header({
         </div>
 
         {/* Right: Cart Quote Drawer & Auth / Admin Panel */}
-        <div className="flex items-center gap-2 sm:gap-3">
-          {/* Cart Button with Gold Badge */}
+        <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+          {/* Cart Button */}
           <button
             onClick={openCart}
             className="relative p-2 sm:p-2.5 rounded-lg bg-[#181818] hover:bg-[#252525] active:scale-95 border border-[#383838] text-white transition-all cursor-pointer flex items-center gap-2 hover:border-[#d99000]/50 group"
@@ -148,7 +149,7 @@ export default function Header({
               className="px-3.5 py-2 rounded-lg bg-[#181818] hover:bg-[#252525] border border-[#383838] text-white text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer"
             >
               <User className="w-4 h-4 text-white" />
-              <span>Usuario Cliente</span>
+              <span className="hidden sm:inline">Usuario Cliente</span>
             </button>
           )}
         </div>

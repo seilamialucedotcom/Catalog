@@ -56,37 +56,37 @@ export default function ProductCard({ product, onQuickView }) {
         </div>
 
         {/* Stacked Badges Top Left as in reference image */}
-        <div className="absolute top-2.5 left-2.5 flex flex-col items-start gap-1 z-10">
+        <div className="absolute left-1.5 top-1.5 z-10 flex flex-col items-start gap-1 sm:left-2.5 sm:top-2.5">
           {product.category_name && (
-            <span className="bg-[#181818] text-white text-[10px] sm:text-[11px] font-bold px-2 py-0.5 rounded-sm tracking-wide shadow-sm">
+            <span className="bg-[#181818] px-1.5 py-0.5 text-[9px] font-bold tracking-wide text-white shadow-sm sm:px-2 sm:text-[11px]">
               {product.category_name}
             </span>
           )}
           {product.is_featured && (
-            <span className="bg-[#c88216] text-white text-[10px] sm:text-[11px] font-bold px-2 py-0.5 rounded-sm uppercase tracking-wider flex items-center gap-1 shadow-sm animate-badge-shimmer">
-              <Star className="w-3 h-3 fill-current animate-spin-slow" />
-              DESTACADO
+            <span className="flex items-center gap-1 bg-[#c88216] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-white shadow-sm animate-badge-shimmer sm:px-2 sm:text-[11px]">
+              <Star className="h-2.5 w-2.5 fill-current animate-spin-slow sm:h-3 sm:w-3" />
+              <span className="hidden sm:inline">DESTACADO</span>
             </span>
           )}
         </div>
       </div>
 
       {/* Product Content Info */}
-      <div className="p-4 flex-1 flex flex-col justify-between bg-white">
+      <div className="flex flex-1 flex-col justify-between bg-white p-2.5 sm:p-4">
         <div>
           {brandName && (
-            <p className="mb-1 text-[10px] font-bold uppercase tracking-[0.14em] text-slate-500">
+            <p className="mb-1 truncate text-[9px] font-bold uppercase tracking-[0.1em] text-slate-500 sm:text-[10px] sm:tracking-[0.14em]">
               {brandName}
             </p>
           )}
-          <h3 className="text-sm sm:text-base font-bold text-[#181818] group-hover:text-[#d99000] transition-colors duration-200 line-clamp-2 leading-snug">
+          <h3 className="line-clamp-2 text-xs font-bold leading-snug text-[#181818] transition-colors duration-200 group-hover:text-[#d99000] sm:text-base">
             {product.name}
           </h3>
-          <p className="mt-2 flex items-center gap-1.5 text-xs font-semibold text-black">
+          <p className="mt-1.5 flex items-center gap-1 text-[10px] font-semibold leading-tight text-black sm:mt-2 sm:gap-1.5 sm:text-xs">
             {isOutOfStock ? (
-              <CircleX className="h-4 w-4 shrink-0 text-red-600" aria-hidden="true" />
+              <CircleX className="h-3 w-3 shrink-0 text-red-600 sm:h-4 sm:w-4" aria-hidden="true" />
             ) : (
-              <CircleCheck className="h-4 w-4 shrink-0 text-emerald-600" aria-hidden="true" />
+              <CircleCheck className="h-3 w-3 shrink-0 text-emerald-600 sm:h-4 sm:w-4" aria-hidden="true" />
             )}
             <span>
               {isOutOfStock
@@ -106,8 +106,8 @@ export default function ProductCard({ product, onQuickView }) {
         </div>
 
         {/* Price & Solid Gold 'Agregar' Button */}
-        <div className="mt-4 pt-3 flex items-center justify-between gap-2">
-          <span className="text-lg sm:text-xl font-black text-[#ca8a04] group-hover:scale-105 origin-left transition-transform duration-200">
+        <div className="mt-2.5 flex items-center justify-between gap-1.5 border-t border-slate-100 pt-2 sm:mt-4 sm:gap-2 sm:border-0 sm:pt-3">
+          <span className="origin-left text-sm font-black text-[#ca8a04] transition-transform duration-200 group-hover:scale-105 sm:text-xl">
             {formatPrice(product.price)}
           </span>
 
@@ -119,7 +119,7 @@ export default function ProductCard({ product, onQuickView }) {
               if (isOutOfStock) return;
               addToCart(product);
             }}
-            className="bg-[#ca8a04] hover:bg-[#b47703] active:scale-90 text-white text-xs font-bold px-4 py-1.5 rounded transition-all duration-200 cursor-pointer shadow-sm hover:shadow-md hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500 disabled:shadow-none disabled:transform-none"
+            className="cursor-pointer rounded bg-[#ca8a04] px-2 py-1.5 text-[10px] font-bold text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#b47703] hover:shadow-md active:scale-90 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500 disabled:shadow-none disabled:transform-none sm:px-4 sm:text-xs"
           >
             Agregar
           </button>

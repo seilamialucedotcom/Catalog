@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, X, Filter, Tag } from 'lucide-react';
+import { Filter, Tag } from 'lucide-react';
 
 export default function SearchBar({
   searchTerm,
@@ -14,26 +14,6 @@ export default function SearchBar({
     <div className="w-full mb-6">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-3">
         
-        {/* Mobile Search Input */}
-        <div className="md:hidden relative">
-          <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Buscar productos..."
-            className="w-full bg-slate-800/90 border border-slate-700 text-slate-100 text-sm rounded-xl pl-10 pr-9 py-2.5 input-glow placeholder-slate-400"
-          />
-          {searchTerm && (
-            <button
-              onClick={() => setSearchTerm('')}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          )}
-        </div>
-
         {/* Subcategories Pills Navigation */}
         {subcategories.length > 0 && (
           <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
