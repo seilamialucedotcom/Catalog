@@ -26,11 +26,11 @@ export default function ProductCard({ product, onQuickView }) {
       className="bg-white border border-slate-200/90 rounded-none sm:rounded-sm shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between overflow-hidden cursor-pointer group"
     >
       {/* Top Image Container & Badges */}
-      <div className="relative w-full aspect-[4/3] bg-slate-100 overflow-hidden flex items-center justify-center">
+      <div className="relative flex h-48 w-full items-center justify-center overflow-hidden bg-white sm:h-56">
         <img
           src={product.image_url}
           alt={product.name}
-          className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-500 ease-out"
+          className="h-full w-full object-contain"
           loading="lazy"
         />
 

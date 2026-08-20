@@ -91,11 +91,11 @@ export default function ProductModal({ product, onClose }) {
 
         <div className="grid grid-cols-1 items-stretch md:grid-cols-2">
           {/* Left: Product Image */}
-          <div className="relative flex h-full w-full items-center justify-center overflow-hidden bg-white p-6 group md:rounded-l-2xl sm:p-8">
+          <div className="relative flex h-64 w-full items-center justify-center overflow-hidden bg-white p-6 group sm:h-80 sm:p-8 md:h-96 md:rounded-l-2xl">
             <img
               src={product.image_url}
               alt={product.name}
-              className="h-full w-full max-h-[450px] object-contain transition-transform duration-500 group-hover:scale-105 sm:max-h-[550px]"
+              className="h-full w-full object-contain"
             />
             {product.is_featured && (
               <span className="absolute top-4 left-4 bg-[#c88216] text-white text-[10px] font-bold px-2.5 py-1 rounded-sm uppercase tracking-wider flex items-center gap-1 shadow-sm animate-badge-shimmer">
