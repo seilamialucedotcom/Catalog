@@ -177,13 +177,6 @@ export default function ProductModal({ product, onClose }) {
                 <ShoppingBag className="w-4 h-4 text-slate-950" />
                 <span>Añadir a mi Cotización</span>
               </button>
-              <button
-                type="button"
-                onClick={handleClose}
-                className="w-full rounded-xl border border-[#383838] py-2.5 text-xs font-semibold text-slate-300 transition-colors hover:border-slate-500 hover:bg-[#252525] hover:text-white"
-              >
-                Cerrar
-              </button>
             </div>
 
           </div>
