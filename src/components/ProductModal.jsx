@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { X, ShoppingBag, MessageCircle, CheckCircle, Star, Plus, Minus, ShieldCheck } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useTheme } from '../context/ThemeContext';
@@ -9,6 +9,41 @@ export default function ProductModal({ product, onClose }) {
   const [quantity, setQuantity] = useState(1);
   const { addToCart } = useCart();
   const { settings } = useTheme();
+  const historyEntryRef = useRef(false);
+
+  const handleClose = useCallback(() => {
+    if (historyEntryRef.current) {
+      historyEntryRef.current = false;
+      window.history.back();
+    }
+    onClose();
+  }, [onClose]);
+
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') handleClose();
+    };
+
+    const handlePopState = () => {
+      if (!historyEntryRef.current) return;
+      historyEntryRef.current = false;
+      onClose();
+    };
+
+    window.history.pushState({ ...window.history.state, productModal: true }, '');
+    historyEntryRef.current = true;
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('popstate', handlePopState);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('popstate', handlePopState);
+      if (historyEntryRef.current) {
+        historyEntryRef.current = false;
+        window.history.back();
+      }
+    };
+  }, [handleClose, onClose]);
 
   if (!product) return null;
 
@@ -26,23 +61,30 @@ export default function ProductModal({ product, onClose }) {
 
   const handleAddToCart = () => {
     addToCart(product, quantity);
-    onClose();
+    handleClose();
   };
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4">
       {/* Backdrop */}
       <div
-        onClick={onClose}
+        onClick={handleClose}
         className="fixed inset-0 drawer-backdrop transition-opacity"
       />
 
       {/* Modal Dialog Card */}
-      <div className="relative w-full max-w-2xl bg-[#181818] border border-[#2a2a2a] rounded-2xl shadow-2xl overflow-hidden z-10 my-8">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label={`Detalle de ${product.name}`}
+        className="relative z-10 my-3 w-full max-w-2xl max-h-[calc(100dvh-1.5rem)] overflow-y-auto rounded-2xl border border-[#2a2a2a] bg-[#181818] shadow-2xl sm:my-8 sm:max-h-[calc(100dvh-4rem)]"
+      >
         {/* Close Button */}
         <button
-          onClick={onClose}
-          className="absolute top-4 right-4 z-20 p-2 rounded-xl bg-[#252525] hover:bg-[#333333] text-slate-400 hover:text-white transition-colors cursor-pointer"
+          type="button"
+          onClick={handleClose}
+          aria-label="Cerrar detalle del producto"
+          className="absolute top-3 right-3 z-50 p-2.5 rounded-xl bg-[#252525] text-slate-400 transition-colors hover:bg-[#333333] hover:text-white cursor-pointer"
         >
           <X className="w-5 h-5" />
         </button>
@@ -134,6 +176,13 @@ export default function ProductModal({ product, onClose }) {
               >
                 <ShoppingBag className="w-4 h-4 text-slate-950" />
                 <span>Añadir a mi Cotización</span>
+              </button>
+              <button
+                type="button"
+                onClick={handleClose}
+                className="w-full rounded-xl border border-[#383838] py-2.5 text-xs font-semibold text-slate-300 transition-colors hover:border-slate-500 hover:bg-[#252525] hover:text-white"
+              >
+                Cerrar
               </button>
             </div>
 
