@@ -247,7 +247,6 @@ export default function AdminDashboard({
       unit_type: prod.unit_type || 'unidad',
       portions: (prod.portions || []).map((portion) => ({
         label: portion.label || '',
-        amount: portion.amount ?? '',
         price: portion.price ?? '',
       })),
       image_url: prod.image_url || '',
@@ -1000,13 +999,13 @@ export default function AdminDashboard({
                 <div className="flex items-center justify-between gap-3">
                   <div>
                     <h4 className="text-xs font-semibold text-white">Precios por porción</h4>
-                    <p className="text-[10px] text-slate-400">Opcional: agrega presentaciones con su cantidad y precio.</p>
+                    <p className="text-[10px] text-slate-400">Opcional: agrega una etiqueta y su precio.</p>
                   </div>
                   <button
                     type="button"
                     onClick={() => setProductForm((current) => ({
                       ...current,
-                      portions: [...current.portions, { label: '', amount: '', price: '' }],
+                      portions: [...current.portions, { label: '', price: '' }],
                     }))}
                     className="inline-flex shrink-0 items-center gap-1 rounded-lg border border-[#d99000]/50 px-2 py-1.5 text-[10px] font-bold text-[#d99000] transition-colors hover:bg-[#d99000]/10"
                   >
@@ -1016,25 +1015,14 @@ export default function AdminDashboard({
                 </div>
 
                 {productForm.portions.map((portion, index) => (
-                  <div key={index} className="grid grid-cols-[1fr_70px_80px_auto] items-end gap-2 rounded-lg bg-[#242424] p-2">
+                  <div key={index} className="grid grid-cols-[1fr_80px_auto] items-end gap-2 rounded-lg bg-[#242424] p-2">
                     <label className="min-w-0 text-[10px] text-slate-400">
                       Etiqueta
                       <input
                         type="text"
                         value={portion.label}
                         onChange={(e) => updatePortion(index, 'label', e.target.value)}
-                        placeholder="Ej. Media caja"
-                        className="mt-1 w-full rounded-lg border border-[#3a3a3a] bg-[#181818] p-2 text-xs text-white focus:border-[#d99000] focus:outline-none"
-                      />
-                    </label>
-                    <label className="text-[10px] text-slate-400">
-                      Cant.
-                      <input
-                        type="number"
-                        min="0.01"
-                        step="0.01"
-                        value={portion.amount}
-                        onChange={(e) => updatePortion(index, 'amount', e.target.value)}
+                        placeholder="Ej. 500g"
                         className="mt-1 w-full rounded-lg border border-[#3a3a3a] bg-[#181818] p-2 text-xs text-white focus:border-[#d99000] focus:outline-none"
                       />
                     </label>

@@ -56,7 +56,6 @@ export default function ProductModal({ product, onClose }) {
   const portions = Array.isArray(product.portions) ? product.portions : [];
   const selectedPortion = portions.find((portion) => portion.id === selectedPortionId) || null;
   const selectedPrice = selectedPortion ? Number(selectedPortion.price) : Number(product.price);
-  const unitLabel = product.unit_type === 'kg' ? 'kg' : product.unit_type === 'paquete' ? 'paquete' : 'unidad';
   const selectedProduct = selectedPortion
     ? {
       ...product,
@@ -71,7 +70,7 @@ export default function ProductModal({ product, onClose }) {
     const number = (settings.whatsapp_number || '+573001234567').replace(/[^0-9+]/g, '');
     const totalPrice = formatPrice(selectedPrice * quantity);
     const portionDetail = selectedPortion
-      ? `*Presentacion:* ${selectedPortion.label} (${selectedPortion.amount} ${unitLabel})\n`
+      ? `*Presentacion:* ${selectedPortion.label}\n`
       : '';
     const text = `¡Hola! Me gustaría pedir el siguiente producto de *${settings.store_name}*:\n\n` +
       `📦 *Producto:* ${product.name}\n` +
@@ -179,7 +178,6 @@ export default function ProductModal({ product, onClose }) {
                             <CheckCircle className={`h-4 w-4 ${isSelected ? 'text-[#d99000]' : 'text-slate-600'}`} />
                             <span>
                               <span className="block font-semibold">{portion.label}</span>
-                              <span className="text-[10px] text-slate-400">{portion.amount} {unitLabel}</span>
                             </span>
                           </span>
                           <strong className="text-[#d99000]">{formatPrice(Number(portion.price))}</strong>
