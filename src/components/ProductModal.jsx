@@ -7,9 +7,15 @@ import { formatPrice } from '../utils/currency';
 
 export default function ProductModal({ product, onClose }) {
   const [quantity, setQuantity] = useState(1);
+  const [selectedPortionId, setSelectedPortionId] = useState(() => product?.portions?.[0]?.id ?? null);
   const { addToCart } = useCart();
   const { settings } = useTheme();
   const historyEntryRef = useRef(false);
+
+  useEffect(() => {
+    setQuantity(1);
+    setSelectedPortionId(product?.portions?.[0]?.id ?? null);
+  }, [product?.id]);
 
   const handleClose = useCallback(() => {
     if (historyEntryRef.current) {
@@ -47,11 +53,29 @@ export default function ProductModal({ product, onClose }) {
 
   if (!product) return null;
 
+  const portions = Array.isArray(product.portions) ? product.portions : [];
+  const selectedPortion = portions.find((portion) => portion.id === selectedPortionId) || null;
+  const selectedPrice = selectedPortion ? Number(selectedPortion.price) : Number(product.price);
+  const unitLabel = product.unit_type === 'kg' ? 'kg' : product.unit_type === 'paquete' ? 'paquete' : 'unidad';
+  const selectedProduct = selectedPortion
+    ? {
+      ...product,
+      id: `${product.id}-portion-${selectedPortion.id}`,
+      name: `${product.name} - ${selectedPortion.label}`,
+      price: selectedPrice,
+      selected_portion: selectedPortion,
+    }
+    : product;
+
   const handleWhatsAppOrder = () => {
     const number = (settings.whatsapp_number || '+573001234567').replace(/[^0-9+]/g, '');
-    const totalPrice = formatPrice(product.price * quantity);
+    const totalPrice = formatPrice(selectedPrice * quantity);
+    const portionDetail = selectedPortion
+      ? `*Presentacion:* ${selectedPortion.label} (${selectedPortion.amount} ${unitLabel})\n`
+      : '';
     const text = `¡Hola! Me gustaría pedir el siguiente producto de *${settings.store_name}*:\n\n` +
       `📦 *Producto:* ${product.name}\n` +
+      portionDetail +
       `🔢 *Cantidad:* ${quantity}\n` +
       `💰 *Precio Total:* ${totalPrice}\n\n` +
       `¿Me apuntas los datos de envío, por favor?`;
@@ -60,7 +84,7 @@ export default function ProductModal({ product, onClose }) {
   };
 
   const handleAddToCart = () => {
-    addToCart(product, quantity);
+    addToCart(selectedProduct, quantity);
     handleClose();
   };
 
@@ -122,7 +146,7 @@ export default function ProductModal({ product, onClose }) {
 
               {/* Price */}
               <div className="text-2xl font-black text-[#d99000] mb-4">
-                {formatPrice(product.price)}
+                {formatPrice(selectedPrice)}
               </div>
 
               {/* Description */}
@@ -130,6 +154,41 @@ export default function ProductModal({ product, onClose }) {
                 value={product.description || 'Producto de alta calidad seleccionado especialmente para ti.'}
                 className="mb-6 rounded-xl border border-[#333333] bg-[#242424] p-3 text-xs leading-relaxed text-slate-300 sm:text-sm"
               />
+
+              {portions.length > 0 && (
+                <fieldset className="mb-6">
+                  <legend className="mb-2 text-xs font-medium text-slate-400">
+                    Precios por porción:
+                  </legend>
+                  <div className="grid gap-2">
+                    {portions.map((portion) => {
+                      const isSelected = portion.id === selectedPortionId;
+                      return (
+                        <button
+                          key={portion.id}
+                          type="button"
+                          onClick={() => setSelectedPortionId(portion.id)}
+                          aria-pressed={isSelected}
+                          className={`flex items-center justify-between rounded-xl border p-3 text-left text-xs transition-colors ${
+                            isSelected
+                              ? 'border-[#d99000] bg-[#d99000]/10 text-white'
+                              : 'border-[#333333] bg-[#242424] text-slate-300 hover:border-[#d99000]/60'
+                          }`}
+                        >
+                          <span className="flex items-center gap-2">
+                            <CheckCircle className={`h-4 w-4 ${isSelected ? 'text-[#d99000]' : 'text-slate-600'}`} />
+                            <span>
+                              <span className="block font-semibold">{portion.label}</span>
+                              <span className="text-[10px] text-slate-400">{portion.amount} {unitLabel}</span>
+                            </span>
+                          </span>
+                          <strong className="text-[#d99000]">{formatPrice(Number(portion.price))}</strong>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </fieldset>
+              )}
 
               {/* Quantity Counter Selector */}
               <div className="mb-6">
@@ -156,7 +215,7 @@ export default function ProductModal({ product, onClose }) {
                   </div>
 
                   <span className="text-xs text-slate-400">
-                    Subtotal: <strong className="text-[#d99000]">{formatPrice(product.price * quantity)}</strong>
+                    Subtotal: <strong className="text-[#d99000]">{formatPrice(selectedPrice * quantity)}</strong>
                   </span>
                 </div>
               </div>

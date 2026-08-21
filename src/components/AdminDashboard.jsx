@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import {
   X,
   Plus,
+  PlusCircle,
+  Search,
   Edit,
   Trash2,
   Package,
@@ -52,6 +54,8 @@ export default function AdminDashboard({
     brand_id: '',
     brand_name: '',
     stock: '',
+    unit_type: 'unidad',
+    portions: [],
     image_url: '',
     is_featured: false,
   });
@@ -83,6 +87,13 @@ export default function AdminDashboard({
   const [productImageStatus, setProductImageStatus] = useState('');
   const [categoryImageStatus, setCategoryImageStatus] = useState('');
   const [brands, setBrands] = useState([]);
+  const [productSearch, setProductSearch] = useState('');
+
+  const normalizedProductSearch = productSearch.trim().toLocaleLowerCase();
+  const filteredProducts = normalizedProductSearch
+    ? products.filter((product) => [product.name, product.brand?.name, product.brand_name]
+      .some((value) => String(value || '').toLocaleLowerCase().includes(normalizedProductSearch)))
+    : products;
 
   const handleImageUpload = (event, setImageUrl, setStatus) => {
     const file = event.target.files?.[0];
@@ -206,6 +217,8 @@ export default function AdminDashboard({
       brand_id: '',
       brand_name: '',
       stock: '',
+      unit_type: 'unidad',
+      portions: [],
       image_url: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&auto=format&fit=crop&q=80',
       is_featured: false,
     });
@@ -231,6 +244,12 @@ export default function AdminDashboard({
       brand_id: prod.brand_id ? String(prod.brand_id) : '',
       brand_name: prod.brand?.name || '',
       stock: prod.stock ?? '',
+      unit_type: prod.unit_type || 'unidad',
+      portions: (prod.portions || []).map((portion) => ({
+        label: portion.label || '',
+        amount: portion.amount ?? '',
+        price: portion.price ?? '',
+      })),
       image_url: prod.image_url || '',
       is_featured: Boolean(prod.is_featured),
     });
@@ -240,6 +259,15 @@ export default function AdminDashboard({
   const productSubcategories = categories.find(
     (category) => String(category.id) === String(productForm.category_id),
   )?.subcategories || [];
+
+  const updatePortion = (index, field, value) => {
+    setProductForm((current) => ({
+      ...current,
+      portions: current.portions.map((portion, portionIndex) => (
+        portionIndex === index ? { ...portion, [field]: value } : portion
+      )),
+    }));
+  };
 
   const handleSaveProduct = async (e) => {
     e.preventDefault();
@@ -433,19 +461,32 @@ export default function AdminDashboard({
         {/* TAB 1: PRODUCT MANAGEMENT */}
         {activeTab === 'products' && (
           <div className="space-y-4">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <h3 className="text-lg font-bold text-white">Catálogo de Productos</h3>
                 <p className="text-xs text-slate-400">Gestiona precios, categorías, imágenes y estado destacado.</p>
               </div>
 
-              <button
-                onClick={handleOpenCreateProduct}
-                className="btn-primary text-xs flex items-center gap-1.5 cursor-pointer"
-              >
-                <Plus className="w-4 h-4" />
-                <span>Nuevo Producto</span>
-              </button>
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                <label className="relative block">
+                  <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+                  <input
+                    type="search"
+                    value={productSearch}
+                    onChange={(event) => setProductSearch(event.target.value)}
+                    placeholder="Buscar por nombre o marca"
+                    aria-label="Buscar productos por nombre o marca"
+                    className="w-full rounded-xl border border-[#333333] bg-[#242424] py-2 pl-9 pr-3 text-xs text-slate-100 placeholder:text-slate-500 focus:border-[#d99000] focus:outline-none sm:w-60"
+                  />
+                </label>
+                <button
+                  onClick={handleOpenCreateProduct}
+                  className="btn-primary text-xs flex items-center gap-1.5 cursor-pointer"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Nuevo Producto</span>
+                </button>
+              </div>
             </div>
 
             {/* Products Table */}
@@ -462,7 +503,7 @@ export default function AdminDashboard({
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#2a2a2a]">
-                    {products.map((prod) => (
+                    {filteredProducts.map((prod) => (
                       <tr key={prod.id} className="hover:bg-[#202020] transition-colors">
                         <td className="py-3 px-4 flex items-center gap-3">
                           <img
@@ -472,6 +513,7 @@ export default function AdminDashboard({
                           />
                           <div>
                             <div className="font-bold text-slate-100">{prod.name}</div>
+                            {prod.brand?.name && <div className="text-[10px] text-slate-400">{prod.brand.name}</div>}
                             <RichTextContent value={prod.description} className="line-clamp-1 max-w-xs text-[10px] text-slate-500" />
                           </div>
                         </td>
@@ -510,6 +552,13 @@ export default function AdminDashboard({
                         </td>
                       </tr>
                     ))}
+                    {filteredProducts.length === 0 && (
+                      <tr>
+                        <td colSpan="5" className="px-4 py-8 text-center text-slate-500">
+                          No se encontraron productos con ese nombre o marca.
+                        </td>
+                      </tr>
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -852,6 +901,19 @@ export default function AdminDashboard({
                 />
               </div>
 
+              <div>
+                <label className="mb-1 block text-xs text-slate-300">Tipo de unidad</label>
+                <select
+                  value={productForm.unit_type}
+                  onChange={(e) => setProductForm((current) => ({ ...current, unit_type: e.target.value }))}
+                  className="w-full rounded-xl border border-[#333333] bg-[#242424] p-2.5 text-xs text-slate-100 focus:border-[#d99000] focus:outline-none"
+                >
+                  <option value="unidad">Unidad</option>
+                  <option value="paquete">Paquete</option>
+                  <option value="kg">Kilogramo (kg)</option>
+                </select>
+              </div>
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="text-xs text-slate-300 block mb-1">Marca</label>
@@ -932,6 +994,74 @@ export default function AdminDashboard({
                     <option key={subcategory.id} value={String(subcategory.id)}>{subcategory.name}</option>
                   ))}
                 </select>
+              </div>
+
+              <div className="space-y-2 rounded-xl border border-[#333333] bg-[#202020] p-3">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <h4 className="text-xs font-semibold text-white">Precios por porción</h4>
+                    <p className="text-[10px] text-slate-400">Opcional: agrega presentaciones con su cantidad y precio.</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setProductForm((current) => ({
+                      ...current,
+                      portions: [...current.portions, { label: '', amount: '', price: '' }],
+                    }))}
+                    className="inline-flex shrink-0 items-center gap-1 rounded-lg border border-[#d99000]/50 px-2 py-1.5 text-[10px] font-bold text-[#d99000] transition-colors hover:bg-[#d99000]/10"
+                  >
+                    <PlusCircle className="h-4 w-4" />
+                    Agregar porción
+                  </button>
+                </div>
+
+                {productForm.portions.map((portion, index) => (
+                  <div key={index} className="grid grid-cols-[1fr_70px_80px_auto] items-end gap-2 rounded-lg bg-[#242424] p-2">
+                    <label className="min-w-0 text-[10px] text-slate-400">
+                      Etiqueta
+                      <input
+                        type="text"
+                        value={portion.label}
+                        onChange={(e) => updatePortion(index, 'label', e.target.value)}
+                        placeholder="Ej. Media caja"
+                        className="mt-1 w-full rounded-lg border border-[#3a3a3a] bg-[#181818] p-2 text-xs text-white focus:border-[#d99000] focus:outline-none"
+                      />
+                    </label>
+                    <label className="text-[10px] text-slate-400">
+                      Cant.
+                      <input
+                        type="number"
+                        min="0.01"
+                        step="0.01"
+                        value={portion.amount}
+                        onChange={(e) => updatePortion(index, 'amount', e.target.value)}
+                        className="mt-1 w-full rounded-lg border border-[#3a3a3a] bg-[#181818] p-2 text-xs text-white focus:border-[#d99000] focus:outline-none"
+                      />
+                    </label>
+                    <label className="text-[10px] text-slate-400">
+                      Precio
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={portion.price}
+                        onChange={(e) => updatePortion(index, 'price', e.target.value)}
+                        className="mt-1 w-full rounded-lg border border-[#3a3a3a] bg-[#181818] p-2 text-xs text-white focus:border-[#d99000] focus:outline-none"
+                      />
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => setProductForm((current) => ({
+                        ...current,
+                        portions: current.portions.filter((_, portionIndex) => portionIndex !== index),
+                      }))}
+                      className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-rose-950/50 hover:text-rose-300"
+                      aria-label={`Eliminar porción ${index + 1}`}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                ))}
               </div>
 
               <div>
